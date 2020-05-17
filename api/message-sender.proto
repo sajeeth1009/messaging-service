@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package inf.message_service;
+option go_package = "github.com/influenzanet/messaging-service/pkg/api/sender";
+
+import "google/protobuf/empty.proto";
+
+service MessagingServiceApi {
+  rpc Status(google.protobuf.Empty) returns (ServiceStatus);
+}
+
+/*
+ * Status is typically used as a return value indicating if the method was
+ * performed normally, or the system has any internal error e.g. checking system
+ * status of a service
+ */
+message ServiceStatus {
+  enum StatusValue {
+    NORMAL = 0;
+    PROBLEM = 1;
+  }
+  StatusValue status = 1;
+  string msg = 2;
+  string version = 3;
+}
