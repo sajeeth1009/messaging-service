@@ -78,8 +78,8 @@ func (ServiceStatus_StatusValue) EnumDescriptor() ([]byte, []int) {
 
 //
 // Status is typically used as a return value indicating if the method was
-// performed normally, or the system has any internal error e.g. checking system
-// status of a service
+// performed normally, or the system has any internal error e.g. checking
+// system status of a service
 type ServiceStatus struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -143,6 +143,61 @@ func (x *ServiceStatus) GetVersion() string {
 	return ""
 }
 
+type SendEmailReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	To      []string `protobuf:"bytes,1,rep,name=to,proto3" json:"to,omitempty"`
+	Content string   `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (x *SendEmailReq) Reset() {
+	*x = SendEmailReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_message_sender_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SendEmailReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendEmailReq) ProtoMessage() {}
+
+func (x *SendEmailReq) ProtoReflect() protoreflect.Message {
+	mi := &file_api_message_sender_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendEmailReq.ProtoReflect.Descriptor instead.
+func (*SendEmailReq) Descriptor() ([]byte, []int) {
+	return file_api_message_sender_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SendEmailReq) GetTo() []string {
+	if x != nil {
+		return x.To
+	}
+	return nil
+}
+
+func (x *SendEmailReq) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
 var File_api_message_sender_proto protoreflect.FileDescriptor
 
 var file_api_message_sender_proto_rawDesc = []byte{
@@ -161,17 +216,26 @@ var file_api_message_sender_proto_rawDesc = []byte{
 	0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69,
 	0x6f, 0x6e, 0x22, 0x26, 0x0a, 0x0b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x56, 0x61, 0x6c, 0x75,
 	0x65, 0x12, 0x0a, 0x0a, 0x06, 0x4e, 0x4f, 0x52, 0x4d, 0x41, 0x4c, 0x10, 0x00, 0x12, 0x0b, 0x0a,
-	0x07, 0x50, 0x52, 0x4f, 0x42, 0x4c, 0x45, 0x4d, 0x10, 0x01, 0x32, 0x5b, 0x0a, 0x13, 0x4d, 0x65,
-	0x73, 0x73, 0x61, 0x67, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x41, 0x70,
-	0x69, 0x12, 0x44, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x16, 0x2e, 0x67, 0x6f,
-	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d,
-	0x70, 0x74, 0x79, 0x1a, 0x22, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
-	0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x42, 0x3a, 0x5a, 0x38, 0x67, 0x69, 0x74, 0x68, 0x75,
-	0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x69, 0x6e, 0x66, 0x6c, 0x75, 0x65, 0x6e, 0x7a, 0x61, 0x6e,
-	0x65, 0x74, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x69, 0x6e, 0x67, 0x2d, 0x73, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x73, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x07, 0x50, 0x52, 0x4f, 0x42, 0x4c, 0x45, 0x4d, 0x10, 0x01, 0x22, 0x38, 0x0a, 0x0c, 0x53, 0x65,
+	0x6e, 0x64, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x74, 0x6f,
+	0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x02, 0x74, 0x6f, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f,
+	0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e,
+	0x74, 0x65, 0x6e, 0x74, 0x32, 0xaf, 0x01, 0x0a, 0x13, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x69,
+	0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x41, 0x70, 0x69, 0x12, 0x44, 0x0a, 0x06,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x22,
+	0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x5f, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x12, 0x52, 0x0a, 0x09, 0x53, 0x65, 0x6e, 0x64, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12,
+	0x21, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x5f, 0x73, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x52,
+	0x65, 0x71, 0x1a, 0x22, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x42, 0x3a, 0x5a, 0x38, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x69, 0x6e, 0x66, 0x6c, 0x75, 0x65, 0x6e, 0x7a, 0x61, 0x6e, 0x65,
+	0x74, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x69, 0x6e, 0x67, 0x2d, 0x73, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x73, 0x65, 0x6e, 0x64,
+	0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -187,18 +251,21 @@ func file_api_message_sender_proto_rawDescGZIP() []byte {
 }
 
 var file_api_message_sender_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_message_sender_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_api_message_sender_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_api_message_sender_proto_goTypes = []interface{}{
 	(ServiceStatus_StatusValue)(0), // 0: inf.message_service.ServiceStatus.StatusValue
 	(*ServiceStatus)(nil),          // 1: inf.message_service.ServiceStatus
-	(*empty.Empty)(nil),            // 2: google.protobuf.Empty
+	(*SendEmailReq)(nil),           // 2: inf.message_service.SendEmailReq
+	(*empty.Empty)(nil),            // 3: google.protobuf.Empty
 }
 var file_api_message_sender_proto_depIdxs = []int32{
 	0, // 0: inf.message_service.ServiceStatus.status:type_name -> inf.message_service.ServiceStatus.StatusValue
-	2, // 1: inf.message_service.MessagingServiceApi.Status:input_type -> google.protobuf.Empty
-	1, // 2: inf.message_service.MessagingServiceApi.Status:output_type -> inf.message_service.ServiceStatus
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
+	3, // 1: inf.message_service.MessagingServiceApi.Status:input_type -> google.protobuf.Empty
+	2, // 2: inf.message_service.MessagingServiceApi.SendEmail:input_type -> inf.message_service.SendEmailReq
+	1, // 3: inf.message_service.MessagingServiceApi.Status:output_type -> inf.message_service.ServiceStatus
+	1, // 4: inf.message_service.MessagingServiceApi.SendEmail:output_type -> inf.message_service.ServiceStatus
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -222,6 +289,18 @@ func file_api_message_sender_proto_init() {
 				return nil
 			}
 		}
+		file_api_message_sender_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SendEmailReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -229,7 +308,7 @@ func file_api_message_sender_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_message_sender_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -257,6 +336,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MessagingServiceApiClient interface {
 	Status(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ServiceStatus, error)
+	SendEmail(ctx context.Context, in *SendEmailReq, opts ...grpc.CallOption) (*ServiceStatus, error)
 }
 
 type messagingServiceApiClient struct {
@@ -276,9 +356,19 @@ func (c *messagingServiceApiClient) Status(ctx context.Context, in *empty.Empty,
 	return out, nil
 }
 
+func (c *messagingServiceApiClient) SendEmail(ctx context.Context, in *SendEmailReq, opts ...grpc.CallOption) (*ServiceStatus, error) {
+	out := new(ServiceStatus)
+	err := c.cc.Invoke(ctx, "/inf.message_service.MessagingServiceApi/SendEmail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessagingServiceApiServer is the server API for MessagingServiceApi service.
 type MessagingServiceApiServer interface {
 	Status(context.Context, *empty.Empty) (*ServiceStatus, error)
+	SendEmail(context.Context, *SendEmailReq) (*ServiceStatus, error)
 }
 
 // UnimplementedMessagingServiceApiServer can be embedded to have forward compatible implementations.
@@ -287,6 +377,9 @@ type UnimplementedMessagingServiceApiServer struct {
 
 func (*UnimplementedMessagingServiceApiServer) Status(context.Context, *empty.Empty) (*ServiceStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
+func (*UnimplementedMessagingServiceApiServer) SendEmail(context.Context, *SendEmailReq) (*ServiceStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendEmail not implemented")
 }
 
 func RegisterMessagingServiceApiServer(s *grpc.Server, srv MessagingServiceApiServer) {
@@ -311,6 +404,24 @@ func _MessagingServiceApi_Status_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MessagingServiceApi_SendEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendEmailReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagingServiceApiServer).SendEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.message_service.MessagingServiceApi/SendEmail",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagingServiceApiServer).SendEmail(ctx, req.(*SendEmailReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _MessagingServiceApi_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "inf.message_service.MessagingServiceApi",
 	HandlerType: (*MessagingServiceApiServer)(nil),
@@ -318,6 +429,10 @@ var _MessagingServiceApi_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Status",
 			Handler:    _MessagingServiceApi_Status_Handler,
+		},
+		{
+			MethodName: "SendEmail",
+			Handler:    _MessagingServiceApi_SendEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

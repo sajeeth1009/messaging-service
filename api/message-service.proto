@@ -7,6 +7,8 @@ import "google/protobuf/empty.proto";
 
 service MessagingServiceApi {
   rpc Status(google.protobuf.Empty) returns (ServiceStatus);
+
+  rpc SendInstantEmail(SendEmailReq) returns (ServiceStatus);
 }
 
 /*
@@ -22,4 +24,11 @@ message ServiceStatus {
   StatusValue status = 1;
   string msg = 2;
   string version = 3;
+}
+
+message SendEmailReq {
+  repeated string to = 1;
+  string message_type = 2;
+  string preferred_language = 3;
+  map<string, string> content_infos = 4;
 }

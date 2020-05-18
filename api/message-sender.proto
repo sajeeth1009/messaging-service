@@ -7,12 +7,13 @@ import "google/protobuf/empty.proto";
 
 service MessagingServiceApi {
   rpc Status(google.protobuf.Empty) returns (ServiceStatus);
+  rpc SendEmail(SendEmailReq) returns (ServiceStatus);
 }
 
 /*
  * Status is typically used as a return value indicating if the method was
- * performed normally, or the system has any internal error e.g. checking system
- * status of a service
+ * performed normally, or the system has any internal error e.g. checking
+ * system status of a service
  */
 message ServiceStatus {
   enum StatusValue {
@@ -22,4 +23,9 @@ message ServiceStatus {
   StatusValue status = 1;
   string msg = 2;
   string version = 3;
+}
+
+message SendEmailReq {
+  repeated string to = 1;
+  string content = 2;
 }
