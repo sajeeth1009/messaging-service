@@ -27,8 +27,9 @@ message ServiceStatus {
 }
 
 message SendEmailReq {
-  repeated string to = 1;
-  string message_type = 2;
-  string preferred_language = 3;
-  map<string, string> content_infos = 4;
+  string instance_id = 1;
+  repeated string to = 2;
+  string message_type = 3;
+  string preferred_language = 4;
+  map<string, string> content_infos = 5;
 }
