@@ -3,10 +3,11 @@ module github.com/influenzanet/messaging-service
 go 1.14
 
 require (
+	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.4.2
-	github.com/influenzanet/user-management-service v0.3.0
+	github.com/influenzanet/user-management-service v0.4.0-alpha
 	go.mongodb.org/mongo-driver v1.3.3
-	golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7 // indirect
+	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
 	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
 	google.golang.org/genproto v0.0.0-20200519141106-08726f379972 // indirect
 	google.golang.org/grpc v1.29.1

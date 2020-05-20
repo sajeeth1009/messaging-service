@@ -24,7 +24,7 @@ type messagingServer struct {
 	//globalDBService  *globaldb.GlobalDBService
 }
 
-// NewUserManagementServer creates a new service instance
+// NewMessagingServiceServer creates a new service instance
 func NewMessagingServiceServer(
 	clients *types.APIClients,
 	messageDBservice *messagedb.MessageDBService,

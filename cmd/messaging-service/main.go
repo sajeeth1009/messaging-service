@@ -19,7 +19,7 @@ type Config struct {
 	MessageDBConfig types.DBConfig
 	ServiceURLs     struct {
 		UserManagementService string
-		EmailClientService string
+		EmailClientService    string
 	}
 }
 
@@ -43,7 +43,7 @@ func main() {
 
 	emailClient, close := gc.ConnectToEmailClientService(conf.ServiceURLs.EmailClientService)
 	defer close()
-	clients. = emailClient
+	clients.EmailClientService = emailClient
 	// <---
 
 	messageDBService := messagedb.NewMessageDBService(conf.MessageDBConfig)
