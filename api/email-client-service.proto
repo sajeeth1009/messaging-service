@@ -1,11 +1,11 @@
 syntax = "proto3";
 
 package inf.message_service;
-option go_package = "github.com/influenzanet/messaging-service/pkg/api/sender";
+option go_package = "github.com/influenzanet/messaging-service/pkg/api/email_client_service";
 
 import "google/protobuf/empty.proto";
 
-service MessagingServiceApi {
+service EmailClientServiceApi {
   rpc Status(google.protobuf.Empty) returns (ServiceStatus);
   rpc SendEmail(SendEmailReq) returns (ServiceStatus);
 }

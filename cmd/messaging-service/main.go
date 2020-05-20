@@ -19,6 +19,7 @@ type Config struct {
 	MessageDBConfig types.DBConfig
 	ServiceURLs     struct {
 		UserManagementService string
+		EmailClientService string
 	}
 }
 
@@ -26,6 +27,7 @@ func initConfig() Config {
 	conf := Config{}
 	conf.Port = os.Getenv("MESSAGING_SERVICE_LISTEN_PORT")
 	conf.ServiceURLs.UserManagementService = os.Getenv("ADDR_USER_MANAGEMENT_SERVICE")
+	conf.ServiceURLs.EmailClientService = os.Getenv("ADDR_EMAIL_CLIENT_SERVICE")
 	conf.MessageDBConfig = config.GetMessageDBConfig()
 	return conf
 }
@@ -33,11 +35,16 @@ func initConfig() Config {
 func main() {
 	conf := initConfig()
 
+	// ---> client connections
 	clients := &types.APIClients{}
-
 	umClient, close := gc.ConnectToUserManagementService(conf.ServiceURLs.UserManagementService)
 	defer close()
 	clients.UserManagementService = umClient
+
+	emailClient, close := gc.ConnectToEmailClientService(conf.ServiceURLs.EmailClientService)
+	defer close()
+	clients. = emailClient
+	// <---
 
 	messageDBService := messagedb.NewMessageDBService(conf.MessageDBConfig)
 
