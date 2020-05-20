@@ -6,10 +6,10 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
-
 
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
+	"github.com/influenzanet/messaging-service/pkg/dbs/messagedb"
+	"github.com/influenzanet/messaging-service/pkg/types"
 	"google.golang.org/grpc"
 )
 
@@ -19,7 +19,7 @@ const (
 )
 
 type messagingServer struct {
-	clients          *models.APIClients
+	clients          *types.APIClients
 	messageDBservice *messagedb.MessageDBService
 	//globalDBService  *globaldb.GlobalDBService
 }
@@ -27,11 +27,11 @@ type messagingServer struct {
 // NewUserManagementServer creates a new service instance
 func NewMessagingServiceServer(
 	clients *types.APIClients,
-	messageDBservice *messagedb.MessageDBService
+	messageDBservice *messagedb.MessageDBService,
 ) api.MessagingServiceApiServer {
 	return &messagingServer{
-		clients:         clients,
-		messageDBservice:   messageDBservice,
+		clients:          clients,
+		messageDBservice: messageDBservice,
 	}
 }
 

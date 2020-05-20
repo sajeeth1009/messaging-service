@@ -5,5 +5,5 @@ import (
 )
 
 type APIClients struct {
-	userManagementService umAPI.UserManagmentSeriveApiClient
+	UserManagementService umAPI.UserManagementApiClient
 }
