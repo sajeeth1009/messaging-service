@@ -1,0 +1,13 @@
+from: noreply-or-replyto@example.com
+fromName: Message Bot
+servers:
+- host: test.example.com
+  port: 234
+  auth:
+    user: testuser
+    password: testpassword
+- host: test2.example.com
+  port: 235
+  auth:
+    user: testuser2
+    password: testpassword2

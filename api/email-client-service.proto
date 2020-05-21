@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package inf.message_service;
+package inf.email_client_service;
 option go_package = "github.com/influenzanet/messaging-service/pkg/api/email_client_service";
 
 import "google/protobuf/empty.proto";
