@@ -1,4 +1,4 @@
-package smtp
+package smtp_client
 
 import (
 	"io/ioutil"

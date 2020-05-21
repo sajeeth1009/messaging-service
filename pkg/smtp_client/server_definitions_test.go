@@ -1,4 +1,4 @@
-package smtp
+package smtp_client
 
 import (
 	"log"
@@ -9,7 +9,7 @@ func TestReadServerConfigsFromFile(t *testing.T) {
 	servers := SmtpServerList{}
 
 	t.Run("with wrong filename", func(t *testing.T) {
-		err := servers.ReadFromFile("../../../test/configs/nothere.yaml")
+		err := servers.ReadFromFile("../../test/configs/nothere.yaml")
 		if err == nil {
 			t.Error("error expected")
 		}
@@ -17,7 +17,7 @@ func TestReadServerConfigsFromFile(t *testing.T) {
 
 	t.Run("with wrong content", func(t *testing.T) {
 
-		err := servers.ReadFromFile("../../../test/configs/smtp-servers-wrong.yaml")
+		err := servers.ReadFromFile("../../test/configs/smtp-servers-wrong.yaml")
 		if err == nil {
 			t.Error("error expected")
 		}
