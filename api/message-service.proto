@@ -49,9 +49,11 @@ message SendEmailReq {
 }
 
 message EmailTemplate {
-  string message_type = 1;
-  string study_key = 2;
-  repeated LocalizedTemplate translations = 3;
+  string id = 1;
+  string message_type = 2;
+  string study_key = 3;
+  string default_language = 4;
+  repeated LocalizedTemplate translations = 5;
 }
 
 message LocalizedTemplate {
