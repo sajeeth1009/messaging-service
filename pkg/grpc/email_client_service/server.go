@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	api "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
+	sc "github.com/influenzanet/messaging-service/pkg/smtp_client"
 	"google.golang.org/grpc"
 )
 
@@ -17,16 +18,21 @@ const (
 )
 
 type emailClientServer struct {
+	StmpClients *sc.SmtpClients
 }
 
 // NewEmailClientServiceServer creates a new service instance
-func NewEmailClientServiceServer() api.EmailClientServiceApiServer {
-	return &emailClientServer{}
+func NewEmailClientServiceServer(
+	sClients *sc.SmtpClients,
+) api.EmailClientServiceApiServer {
+	return &emailClientServer{
+		StmpClients: sClients,
+	}
 }
 
 // RunServer runs gRPC service to publish ToDo service
 func RunServer(
-	ctx context.Context, port string,
+	ctx context.Context, port string, sClients *sc.SmtpClients,
 ) error {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -35,7 +41,7 @@ func RunServer(
 
 	// register service
 	server := grpc.NewServer()
-	api.RegisterEmailClientServiceApiServer(server, NewEmailClientServiceServer())
+	api.RegisterEmailClientServiceApiServer(server, NewEmailClientServiceServer(sClients))
 
 	// graceful shutdown
 	c := make(chan os.Signal, 1)

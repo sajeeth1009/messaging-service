@@ -24,7 +24,7 @@ func TestReadServerConfigsFromFile(t *testing.T) {
 	})
 
 	t.Run("with valid content", func(t *testing.T) {
-		err := servers.ReadFromFile("../../../test/configs/smtp-servers.yaml")
+		err := servers.ReadFromFile("../../test/configs/smtp-servers.yaml")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
