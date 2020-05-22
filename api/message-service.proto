@@ -9,6 +9,10 @@ service MessagingServiceApi {
   rpc Status(google.protobuf.Empty) returns (ServiceStatus);
 
   rpc SendInstantEmail(SendEmailReq) returns (ServiceStatus);
+
+  rpc GetEmailTemplates(GetEmailTemplatesReq) returns (EmailTemplates);
+  rpc SaveEmailTemplate(SaveEmailTemplateReq) returns (EmailTemplate);
+  rpc DeleteEmailTemplate(DeleteEmailTemplateReq) returns (ServiceStatus);
 }
 
 /*
@@ -26,10 +30,46 @@ message ServiceStatus {
   string version = 3;
 }
 
+message TokenInfos {
+  string id = 1; // User id
+  string instance_id =
+      2; // To which instance/country/high level group/ does the user belongs to
+  int64 issued_at = 3;             // time of token generation in posix time
+  map<string, string> payload = 4; // optional infos, e.g., role(s)
+  string profil_id = 5;            // which subprofile of the user is selected
+  bool account_confirmed = 6;      // e.g. if user verified email, phone address
+}
+
 message SendEmailReq {
   string instance_id = 1;
   repeated string to = 2;
   string message_type = 3;
   string preferred_language = 4;
   map<string, string> content_infos = 5;
+}
+
+message EmailTemplate {
+  string message_type = 1;
+  string study_key = 2;
+  repeated LocalizedTemplate translations = 3;
+}
+
+message LocalizedTemplate {
+  string lang = 1;
+  string template_def = 2;
+}
+
+message EmailTemplates { repeated EmailTemplate templates = 1; }
+
+message GetEmailTemplatesReq { TokenInfos token = 1; }
+
+message SaveEmailTemplateReq {
+  TokenInfos token = 1;
+  EmailTemplate template = 2;
+}
+
+message DeleteEmailTemplateReq {
+  TokenInfos token = 1;
+  string study_key = 2;
+  string message_type = 3;
 }
