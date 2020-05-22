@@ -21,11 +21,18 @@ func (s *emailClientServer) Status(ctx context.Context, _ *empty.Empty) (*api.Se
 }
 
 func (s *emailClientServer) SendEmail(ctx context.Context, req *api.SendEmailReq) (*api.ServiceStatus, error) {
+	if req == nil || len(req.To) < 1 {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
 	retryCounter := 0
 	for {
 		if err := s.StmpClients.SendMail(
-			[]string{""},
-			"content",
+			req.To,
+			req.FromAddress,
+			req.FromName,
+			req.Subject,
+			req.Content,
 		); err != nil {
 			retryCounter += 1
 			if retryCounter >= maxRetry {

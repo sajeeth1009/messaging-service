@@ -1,22 +1,43 @@
 package email_client_service
 
-import "testing"
+import (
+	"context"
+	"testing"
+
+	api "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
+)
 
 func TestSendEmailEndpoint(t *testing.T) {
-	/*mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	s := emailClientServer{
+		StmpClients: nil,
+	}
 
-	s := userManagementServer{
-		userDBservice:   testUserDBService,
-		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
-			TokenExpiryInterval: time.Second * 2,
-		},
-		clients: &models.APIClients{
-			MessagingService: mockMessagingClient,
-		},
-	}*/
-	t.Error("test unimplemented")
+	t.Run("with missing payload", func(t *testing.T) {
+		_, err := s.SendEmail(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		_, err := s.SendEmail(context.Background(), &api.SendEmailReq{})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty to list", func(t *testing.T) {
+		_, err := s.SendEmail(context.Background(), &api.SendEmailReq{
+			FromAddress: "test@test.de",
+			FromName:    "test@test.de",
+			Subject:     "test",
+			Content:     "hello",
+		})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
 }

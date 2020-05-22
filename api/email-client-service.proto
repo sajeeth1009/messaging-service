@@ -27,5 +27,8 @@ message ServiceStatus {
 
 message SendEmailReq {
   repeated string to = 1;
-  string content = 2;
+  string from_address = 2;
+  string from_name = 3;
+  string subject = 4;
+  string content = 5;
 }
