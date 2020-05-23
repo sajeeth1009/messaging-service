@@ -15,7 +15,7 @@ import (
 var testDBService *MessageDBService
 
 const (
-	testDBNamePrefix = "TEST_GLOBALDB_"
+	testDBNamePrefix = "TEST_MESSAGE_DB_"
 )
 
 var (
@@ -70,7 +70,7 @@ func dropTestDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := testDBService.DBClient.Database(testDBNamePrefix + "messageDB").Drop(ctx)
+	err := testDBService.DBClient.Database(testDBNamePrefix + testInstanceID + "_messageDB").Drop(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

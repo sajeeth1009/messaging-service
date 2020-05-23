@@ -19,6 +19,9 @@ func (s *messagingServer) Status(ctx context.Context, _ *empty.Empty) (*api.Serv
 }
 
 func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEmailReq) (*api.ServiceStatus, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
 	// TODO: check inputs
 	// TODO: find and execute template
 	_, err := s.clients.EmailClientService.SendEmail(ctx, &emailAPI.SendEmailReq{
@@ -54,9 +57,8 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
         </table>
     </body>
 </html>`,
-		FromAddress: "hevesi@flow-one.de",
-		FromName:    "InfluenzatNet",
-		Subject:     req.MessageType,
+		FromName: "InfluenzatNet",
+		Subject:  req.MessageType,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
