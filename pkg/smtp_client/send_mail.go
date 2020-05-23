@@ -25,7 +25,7 @@ func (sc *SmtpClients) SendMail(
 		"",
 		selectedServer.AuthData.Username,
 		selectedServer.AuthData.Password,
-		selectedServer.Address(),
+		selectedServer.Host,
 	)
 
 	from := sc.servers.FromAddr
@@ -35,20 +35,15 @@ func (sc *SmtpClients) SendMail(
 
 	fromName := sc.servers.FromName
 	if len(fromNameOverride) > 0 {
-		fromName = fromAddressOverride
+		fromName = fromNameOverride
 	}
 
 	message := "To: " + strings.Join(to, ",") + "\r\n"
-	message += "From: \"" + fromName + "\" " + from + "\r\n"
+	message += "From: \"" + fromName + "\" <" + from + ">\r\n"
 	message += "Subject: " + subject + "\r\n"
-	message += "\r\n"
+	message += "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	message += content
-
-	log.Println(auth)
 	log.Println(message)
-	/*
-		if err := smtp.SendMail(selectedServer.Address(), auth, from, []string{"hevesi.peti@gmail.com"}, []byte(message)); err != nil {
-			fmt.Println("Error SendMail: ", err)
-		}*/
-	return nil
+
+	return smtp.SendMail(selectedServer.Address(), auth, from, to, []byte(message))
 }
