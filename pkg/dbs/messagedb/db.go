@@ -58,6 +58,10 @@ func (dbService *MessageDBService) collectionRefOutgoingEmails(instanceID string
 	return dbService.DBClient.Database(dbService.DBNamePrefix + instanceID + "_messageDB").Collection("outgoing-emails")
 }
 
+func (dbService *MessageDBService) collectionRefSentEmails(instanceID string) *mongo.Collection {
+	return dbService.DBClient.Database(dbService.DBNamePrefix + instanceID + "_messageDB").Collection("sent-emails")
+}
+
 // DB utils
 func (dbService *MessageDBService) getContext() (ctx context.Context, cancel context.CancelFunc) {
 	return context.WithTimeout(context.Background(), time.Duration(dbService.timeout)*time.Second)
