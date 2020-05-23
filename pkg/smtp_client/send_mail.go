@@ -2,9 +2,10 @@ package smtp_client
 
 import (
 	"errors"
-	"log"
 	"net/smtp"
-	"strings"
+	"net/textproto"
+
+	"github.com/jordan-wright/email"
 )
 
 func (sc *SmtpClients) SendMail(
@@ -12,7 +13,7 @@ func (sc *SmtpClients) SendMail(
 	fromAddressOverride string,
 	fromNameOverride string,
 	subject string,
-	content string,
+	htmlContent string,
 ) error {
 	sc.counter += 1
 	if len(sc.servers.Servers) < 1 {
@@ -28,22 +29,29 @@ func (sc *SmtpClients) SendMail(
 		selectedServer.Host,
 	)
 
-	from := sc.servers.FromAddr
-	if len(fromAddressOverride) > 0 {
-		from = fromAddressOverride
+	e := &email.Email{
+		To:      to,
+		From:    formatFrom(sc.servers.FromAddr, sc.servers.FromName, fromAddressOverride, fromNameOverride),
+		Subject: subject,
+		HTML:    []byte(htmlContent),
+		Headers: textproto.MIMEHeader{},
+	}
+	return e.Send(selectedServer.Address(), auth)
+}
+
+func formatFrom(defaultAddr string, defaultName string, overrideAddr string, overrideName string) string {
+	fromAddr := defaultAddr
+	if len(overrideAddr) > 0 {
+		fromAddr = overrideAddr
 	}
 
-	fromName := sc.servers.FromName
-	if len(fromNameOverride) > 0 {
-		fromName = fromNameOverride
+	fromName := defaultName
+	if len(overrideName) > 0 {
+		fromName = overrideName
 	}
-
-	message := "To: " + strings.Join(to, ",") + "\r\n"
-	message += "From: \"" + fromName + "\" <" + from + ">\r\n"
-	message += "Subject: " + subject + "\r\n"
-	message += "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	message += content
-	log.Println(message)
-
-	return smtp.SendMail(selectedServer.Address(), auth, from, to, []byte(message))
+	from := fromAddr
+	if len(fromName) > 0 {
+		from = fromName + " <" + fromAddr + ">"
+	}
+	return from
 }
