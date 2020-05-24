@@ -44,8 +44,9 @@ message SendEmailReq {
   string instance_id = 1;
   repeated string to = 2;
   string message_type = 3;
-  string preferred_language = 4;
-  map<string, string> content_infos = 5;
+  string study_key = 4;
+  string preferred_language = 5;
+  map<string, string> content_infos = 6;
 }
 
 message EmailTemplate {

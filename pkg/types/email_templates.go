@@ -10,11 +10,14 @@ type EmailTemplate struct {
 	MessageType     string              `bson:"messageType"`
 	StudyKey        string              `bson:"studyKey,omitempty"`
 	DefaultLanguage string              `bson:"defaultLanguage"`
+	FromName        string              `bson:"fromName"`
+	FromAddress     string              `bson:"fromAddress"`
 	Translations    []LocalizedTemplate `bson:"translations"`
 }
 
 type LocalizedTemplate struct {
 	Lang        string `bson:"languageCode"`
+	Subject     string `bson:"subject"`
 	TemplateDef string `bson:"templateDef"`
 }
 
@@ -32,6 +35,8 @@ func EmailTemplateFromAPI(obj *api.EmailTemplate) EmailTemplate {
 		MessageType:     obj.MessageType,
 		StudyKey:        obj.StudyKey,
 		DefaultLanguage: obj.DefaultLanguage,
+		FromName:        obj.FromName,
+		FromAddress:     obj.FromAddress,
 		Translations:    translations,
 	}
 }
@@ -47,6 +52,8 @@ func (obj EmailTemplate) ToAPI() *api.EmailTemplate {
 		MessageType:     obj.MessageType,
 		StudyKey:        obj.StudyKey,
 		DefaultLanguage: obj.DefaultLanguage,
+		FromAddress:     obj.FromAddress,
+		FromName:        obj.FromName,
 		Translations:    translations,
 	}
 }
@@ -57,6 +64,7 @@ func LocalizedTemplateFromAPI(obj *api.LocalizedTemplate) LocalizedTemplate {
 	}
 	return LocalizedTemplate{
 		Lang:        obj.Lang,
+		Subject:     obj.Subject,
 		TemplateDef: obj.TemplateDef,
 	}
 }
@@ -65,6 +73,7 @@ func LocalizedTemplateFromAPI(obj *api.LocalizedTemplate) LocalizedTemplate {
 func (obj LocalizedTemplate) ToAPI() *api.LocalizedTemplate {
 	return &api.LocalizedTemplate{
 		Lang:        obj.Lang,
+		Subject:     obj.Subject,
 		TemplateDef: obj.TemplateDef,
 	}
 }

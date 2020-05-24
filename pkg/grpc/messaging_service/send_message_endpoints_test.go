@@ -8,6 +8,8 @@ import (
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
 	emailMock "github.com/influenzanet/messaging-service/test/mocks/email-client-service"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestSendInstantEmailEndpoint(t *testing.T) {
@@ -20,6 +22,12 @@ func TestSendInstantEmailEndpoint(t *testing.T) {
 		clients: &types.APIClients{
 			EmailClientService: mockEmailClient,
 		},
+	}
+
+	_, err := s.messageDBservice.SaveEmailTemplate(testInstanceID, types.EmailTemplate{MessageType: "test-type"})
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
 	}
 
 	t.Run("without payload", func(t *testing.T) {
@@ -50,7 +58,57 @@ func TestSendInstantEmailEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Error("add test template")
-	t.Error("test for sending failed") // sending failed (should save to outgoing)
-	t.Error("test unimplemented")      // sending succeeded
+	t.Run("with with sending failing", func(t *testing.T) {
+		mockEmailClient.EXPECT().SendEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, status.Error(codes.Internal, "failed sending message"))
+
+		_, err := s.SendInstantEmail(context.Background(), &api.SendEmailReq{
+			InstanceId:  testInstanceID,
+			To:          []string{"test-failed@test.test"},
+			MessageType: "test-type",
+		})
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		mails, err := s.messageDBservice.FetchOutgoingEmails(testInstanceID, 1)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		if len(mails) != 1 || mails[0].To[0] != "test-failed@test.test" {
+			t.Errorf("unexpected outgoing mail found: %v", mails)
+		}
+	})
+
+	t.Run("with with sending succeeded", func(t *testing.T) {
+		mockEmailClient.EXPECT().SendEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
+		_, err := s.SendInstantEmail(context.Background(), &api.SendEmailReq{
+			InstanceId:  testInstanceID,
+			To:          []string{"test-succeeded@test.test"},
+			MessageType: "test-type",
+		})
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		mails, err := s.messageDBservice.FetchOutgoingEmails(testInstanceID, 1)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		if len(mails) != 0 {
+			t.Errorf("unexpected outgoing mails found: %v", mails)
+		}
+	})
 }
