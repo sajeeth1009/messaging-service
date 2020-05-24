@@ -2,8 +2,8 @@ package smtp_client
 
 import (
 	"errors"
-	"net/smtp"
 	"net/textproto"
+	"time"
 
 	"github.com/jordan-wright/email"
 )
@@ -16,18 +16,12 @@ func (sc *SmtpClients) SendMail(
 	htmlContent string,
 ) error {
 	sc.counter += 1
-	if len(sc.servers.Servers) < 1 {
+	if len(sc.connectionPool) < 1 {
 		return errors.New("no servers defined")
 	}
-	selectedServerIndex := sc.counter % len(sc.servers.Servers)
-	selectedServer := sc.servers.Servers[selectedServerIndex]
 
-	auth := smtp.PlainAuth(
-		"",
-		selectedServer.AuthData.Username,
-		selectedServer.AuthData.Password,
-		selectedServer.Host,
-	)
+	index := sc.counter % len(sc.connectionPool)
+	selectedServer := sc.connectionPool[index]
 
 	e := &email.Email{
 		To:      to,
@@ -36,7 +30,7 @@ func (sc *SmtpClients) SendMail(
 		HTML:    []byte(htmlContent),
 		Headers: textproto.MIMEHeader{},
 	}
-	return e.Send(selectedServer.Address(), auth)
+	return selectedServer.Send(e, time.Second*15)
 }
 
 func formatFrom(defaultAddr string, defaultName string, overrideAddr string, overrideName string) string {

@@ -59,7 +59,7 @@ func TestResolveTemplate(t *testing.T) {
 	})
 
 	t.Run("with dynamic template valid infos", func(t *testing.T) {
-		content, err := ResolveTemplate("testTemp3", "<h1>{{index . \"testKey1\"}}</h1>", contentInfos)
+		content, err := ResolveTemplate("testTemp3", `<h1>{{index . "testKey1"}}</h1>`, contentInfos)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
