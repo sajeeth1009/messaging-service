@@ -55,8 +55,14 @@ message EmailTemplate {
   string study_key = 3;
   string default_language = 4;
   repeated LocalizedTemplate translations = 5;
-  string from_address = 6;
-  string from_name = 7;
+  HeaderOverrides header_overrides = 6;
+}
+
+message HeaderOverrides {
+  string from = 1;
+  string sender = 2;
+  repeated string reply_to = 3;
+  bool no_reply_to = 4;
 }
 
 message LocalizedTemplate {

@@ -8,9 +8,10 @@ import (
 )
 
 type SmtpServerList struct {
-	Servers  []SmtpServer `yaml:"servers"`
-	FromName string       `yaml:"fromName"`
-	FromAddr string       `yaml:"from"`
+	Servers []SmtpServer `yaml:"servers"`
+	From    string       `yaml:"from"`
+	Sender  string       `yaml:"sender"`
+	ReplyTo []string     `yaml:"replyTo"`
 }
 
 type SmtpServer struct {

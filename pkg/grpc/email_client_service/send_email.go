@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 	api "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
+	"github.com/influenzanet/messaging-service/pkg/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -29,10 +30,9 @@ func (s *emailClientServer) SendEmail(ctx context.Context, req *api.SendEmailReq
 	for {
 		if err := s.StmpClients.SendMail(
 			req.To,
-			req.FromAddress,
-			req.FromName,
 			req.Subject,
 			req.Content,
+			types.HeaderOverridesFromEmailClientAPI(req.HeaderOverrides),
 		); err != nil {
 			retryCounter += 1
 			if retryCounter >= maxRetry {

@@ -30,10 +30,11 @@ func TestSendEmailEndpoint(t *testing.T) {
 
 	t.Run("with empty to list", func(t *testing.T) {
 		_, err := s.SendEmail(context.Background(), &api.SendEmailReq{
-			FromAddress: "test@test.de",
-			FromName:    "test@test.de",
-			Subject:     "test",
-			Content:     "hello",
+			Subject: "test",
+			Content: "hello",
+			HeaderOverrides: &api.HeaderOverrides{
+				From: `"Test" <test@test.de>`,
+			},
 		})
 		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
 		if !ok {

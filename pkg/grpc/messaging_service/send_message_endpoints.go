@@ -44,20 +44,18 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
 	}
 
 	outgoingEmail := types.OutgoingEmail{
-		MessageType: req.MessageType,
-		To:          req.To,
-		FromName:    templateDef.FromName,
-		FromAddress: templateDef.FromAddress,
-		Subject:     translation.Subject,
-		Content:     content,
+		MessageType:     req.MessageType,
+		To:              req.To,
+		HeaderOverrides: templateDef.HeaderOverrides,
+		Subject:         translation.Subject,
+		Content:         content,
 	}
 
 	_, err = s.clients.EmailClientService.SendEmail(ctx, &emailAPI.SendEmailReq{
-		To:          outgoingEmail.To,
-		FromName:    outgoingEmail.FromName,
-		FromAddress: outgoingEmail.FromAddress,
-		Subject:     outgoingEmail.Subject,
-		Content:     content,
+		To:              outgoingEmail.To,
+		HeaderOverrides: outgoingEmail.HeaderOverrides.ToEmailClientAPI(),
+		Subject:         outgoingEmail.Subject,
+		Content:         content,
 	})
 	if err != nil {
 		_, errS := s.messageDBservice.AddToOutgoingEmails(req.InstanceId, outgoingEmail)

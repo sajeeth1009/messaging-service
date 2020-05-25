@@ -1,6 +1,7 @@
 package types
 
 import (
+	emailClientAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -10,15 +11,81 @@ type EmailTemplate struct {
 	MessageType     string              `bson:"messageType"`
 	StudyKey        string              `bson:"studyKey,omitempty"`
 	DefaultLanguage string              `bson:"defaultLanguage"`
-	FromName        string              `bson:"fromName"`
-	FromAddress     string              `bson:"fromAddress"`
+	HeaderOverrides *HeaderOverrides    `bson:"headerOverrides"`
 	Translations    []LocalizedTemplate `bson:"translations"`
+}
+
+type HeaderOverrides struct {
+	From      string   `bson:"from"`
+	Sender    string   `bson:"sender"`
+	ReplyTo   []string `bson:"replyTo"`
+	NoReplyTo bool     `bson:"noReplyTo"`
 }
 
 type LocalizedTemplate struct {
 	Lang        string `bson:"languageCode"`
 	Subject     string `bson:"subject"`
 	TemplateDef string `bson:"templateDef"`
+}
+
+func HeaderOverridesFromAPI(obj *api.HeaderOverrides) *HeaderOverrides {
+	if obj == nil {
+		return nil
+	}
+	return &HeaderOverrides{
+		From:      obj.From,
+		Sender:    obj.Sender,
+		ReplyTo:   obj.ReplyTo,
+		NoReplyTo: obj.NoReplyTo,
+	}
+}
+
+func HeaderOverridesFromEmailClientAPI(obj *emailClientAPI.HeaderOverrides) *HeaderOverrides {
+	if obj == nil {
+		return nil
+	}
+	return &HeaderOverrides{
+		From:      obj.From,
+		Sender:    obj.Sender,
+		ReplyTo:   obj.ReplyTo,
+		NoReplyTo: obj.NoReplyTo,
+	}
+}
+
+func HeaderOverridesAPItoAPI(obj *api.HeaderOverrides) *emailClientAPI.HeaderOverrides {
+	if obj == nil {
+		return nil
+	}
+	return &emailClientAPI.HeaderOverrides{
+		From:      obj.From,
+		Sender:    obj.Sender,
+		ReplyTo:   obj.ReplyTo,
+		NoReplyTo: obj.NoReplyTo,
+	}
+}
+
+func (obj *HeaderOverrides) ToAPI() *api.HeaderOverrides {
+	if obj == nil {
+		return nil
+	}
+	return &api.HeaderOverrides{
+		From:      obj.From,
+		Sender:    obj.Sender,
+		ReplyTo:   obj.ReplyTo,
+		NoReplyTo: obj.NoReplyTo,
+	}
+}
+
+func (obj *HeaderOverrides) ToEmailClientAPI() *emailClientAPI.HeaderOverrides {
+	if obj == nil {
+		return nil
+	}
+	return &emailClientAPI.HeaderOverrides{
+		From:      obj.From,
+		Sender:    obj.Sender,
+		ReplyTo:   obj.ReplyTo,
+		NoReplyTo: obj.NoReplyTo,
+	}
 }
 
 func EmailTemplateFromAPI(obj *api.EmailTemplate) EmailTemplate {
@@ -35,8 +102,7 @@ func EmailTemplateFromAPI(obj *api.EmailTemplate) EmailTemplate {
 		MessageType:     obj.MessageType,
 		StudyKey:        obj.StudyKey,
 		DefaultLanguage: obj.DefaultLanguage,
-		FromName:        obj.FromName,
-		FromAddress:     obj.FromAddress,
+		HeaderOverrides: HeaderOverridesFromAPI(obj.HeaderOverrides),
 		Translations:    translations,
 	}
 }
@@ -52,8 +118,7 @@ func (obj EmailTemplate) ToAPI() *api.EmailTemplate {
 		MessageType:     obj.MessageType,
 		StudyKey:        obj.StudyKey,
 		DefaultLanguage: obj.DefaultLanguage,
-		FromAddress:     obj.FromAddress,
-		FromName:        obj.FromName,
+		HeaderOverrides: obj.HeaderOverrides.ToAPI(),
 		Translations:    translations,
 	}
 }
