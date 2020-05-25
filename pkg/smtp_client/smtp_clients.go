@@ -37,6 +37,9 @@ func initConnectionPool(serverList SmtpServerList) []email.Pool {
 			server.AuthData.Password,
 			server.Host,
 		)
+		if server.AuthData.Username == "" && server.AuthData.Password == "" {
+			auth = nil
+		}
 		var pool, err = email.NewPool(server.Address(), server.Connections, auth)
 		if err != nil {
 			log.Print("Error setting up connection pool for: " + server.Address())
