@@ -2,6 +2,7 @@ package messaging_service
 
 import (
 	"context"
+	"encoding/base64"
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -33,10 +34,15 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
 
 	translation := templates.GetTemplateTranslation(templateDef, req.PreferredLanguage)
 
+	decodedTemplate, err := base64.StdEncoding.DecodeString(translation.TemplateDef)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	// execute template
 	content, err := templates.ResolveTemplate(
 		req.InstanceId+req.MessageType+req.PreferredLanguage,
-		translation.TemplateDef,
+		string(decodedTemplate),
 		req.ContentInfos,
 	)
 	if err != nil {
