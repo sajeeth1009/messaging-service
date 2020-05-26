@@ -20,6 +20,7 @@ type Config struct {
 	ServiceURLs     struct {
 		UserManagementService string
 		EmailClientService    string
+		StudyService          string
 	}
 }
 
@@ -27,6 +28,7 @@ func initConfig() Config {
 	conf := Config{}
 	conf.Port = os.Getenv("MESSAGING_SERVICE_LISTEN_PORT")
 	conf.ServiceURLs.UserManagementService = os.Getenv("ADDR_USER_MANAGEMENT_SERVICE")
+	conf.ServiceURLs.UserManagementService = os.Getenv("ADDR_STUDY_SERVICE")
 	conf.ServiceURLs.EmailClientService = os.Getenv("ADDR_EMAIL_CLIENT_SERVICE")
 	conf.MessageDBConfig = config.GetMessageDBConfig()
 	return conf
@@ -44,6 +46,10 @@ func main() {
 	emailClient, close := gc.ConnectToEmailClientService(conf.ServiceURLs.EmailClientService)
 	defer close()
 	clients.EmailClientService = emailClient
+
+	studyClient, close := gc.ConnectToStudyService(conf.ServiceURLs.StudyService)
+	defer close()
+	clients.StudyService = studyClient
 	// <---
 
 	messageDBService := messagedb.NewMessageDBService(conf.MessageDBConfig)

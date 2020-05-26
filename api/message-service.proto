@@ -48,16 +48,14 @@ message TokenInfos {
 
 message SendMessageToAllUsersReq {
   TokenInfos token = 1;
-  string message_type = 2;
-  EmailTemplate template = 3;
+  EmailTemplate template = 2;
 }
 
 message SendMessageToStudyParticipantsReq {
   TokenInfos token = 1;
-  string message_type = 2;
+  EmailTemplate template = 2;
   string study_key = 3;
-  EmailTemplate template = 4;
-  ExpressionArg condition = 5;
+  ExpressionArg condition = 4;
 }
 
 message SendEmailReq {

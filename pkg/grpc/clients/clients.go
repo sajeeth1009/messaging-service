@@ -4,6 +4,7 @@ import (
 	"log"
 
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
+	studyAPI "github.com/influenzanet/study-service/pkg/api"
 	umAPI "github.com/influenzanet/user-management-service/pkg/api"
 	"google.golang.org/grpc"
 )
@@ -24,4 +25,9 @@ func ConnectToUserManagementService(addr string) (client umAPI.UserManagementApi
 func ConnectToEmailClientService(addr string) (client emailAPI.EmailClientServiceApiClient, close func() error) {
 	serverConn := connectToGRPCServer(addr)
 	return emailAPI.NewEmailClientServiceApiClient(serverConn), serverConn.Close
+}
+
+func ConnectToStudyService(addr string) (client studyAPI.StudyServiceApiClient, close func() error) {
+	serverConn := connectToGRPCServer(addr)
+	return studyAPI.NewStudyServiceApiClient(serverConn), serverConn.Close
 }

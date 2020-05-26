@@ -10,6 +10,7 @@ import (
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/templates"
 	"github.com/influenzanet/messaging-service/pkg/types"
+	"github.com/influenzanet/messaging-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -23,12 +24,18 @@ func (s *messagingServer) Status(ctx context.Context, _ *empty.Empty) (*api.Serv
 }
 
 func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.SendMessageToAllUsersReq) (*api.ServiceStatus, error) {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Template == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
 	return nil, status.Error(codes.Unimplemented, "unimplemented")
 	// use go method (don't wait for result since it can take long)
 	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
 }
 
 func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, req *api.SendMessageToStudyParticipantsReq) (*api.ServiceStatus, error) {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.StudyKey == "" || req.Template == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
 	return nil, status.Error(codes.Unimplemented, "unimplemented")
 	// use go method (don't wait for result since it can take long)
 	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
