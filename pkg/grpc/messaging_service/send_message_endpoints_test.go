@@ -12,6 +12,22 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func TestSendMessageToAllUsersEndpoint(t *testing.T) {
+	// with nil
+	// with empty
+	// with non admin
+	// with valid user
+	t.Error("test unimplemented")
+}
+
+func TestSendMessageToStudyParticipantsEndpoint(t *testing.T) {
+	// with nil
+	// with empty
+	// with non admin
+	// with valid user
+	t.Error("test unimplemented")
+}
+
 func TestSendInstantEmailEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()

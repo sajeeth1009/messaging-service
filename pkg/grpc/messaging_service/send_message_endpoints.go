@@ -22,6 +22,19 @@ func (s *messagingServer) Status(ctx context.Context, _ *empty.Empty) (*api.Serv
 	}, nil
 }
 
+func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.SendMessageToAllUsersReq) (*api.ServiceStatus, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	// use go method (don't wait for result since it can take long)
+	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
+}
+
+func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, req *api.SendMessageToStudyParticipantsReq) (*api.ServiceStatus, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	// use go method (don't wait for result since it can take long)
+	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
+	// check study-service with user profiles and given conditions
+}
+
 func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEmailReq) (*api.ServiceStatus, error) {
 	if req == nil || req.InstanceId == "" || len(req.To) < 1 || req.MessageType == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")

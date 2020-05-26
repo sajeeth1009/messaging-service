@@ -9,6 +9,12 @@ service MessagingServiceApi {
   rpc Status(google.protobuf.Empty) returns (ServiceStatus);
 
   rpc SendInstantEmail(SendEmailReq) returns (ServiceStatus);
+  rpc SendMessageToAllUsers(SendMessageToAllUsersReq) returns (ServiceStatus);
+  rpc SendMessageToStudyParticipants(SendMessageToStudyParticipantsReq)
+      returns (ServiceStatus);
+
+  // TODO:
+  // set/schedule automatic messages
 
   rpc GetEmailTemplates(GetEmailTemplatesReq) returns (EmailTemplates);
   rpc SaveEmailTemplate(SaveEmailTemplateReq) returns (EmailTemplate);
@@ -38,6 +44,20 @@ message TokenInfos {
   map<string, string> payload = 4; // optional infos, e.g., role(s)
   string profil_id = 5;            // which subprofile of the user is selected
   bool account_confirmed = 6;      // e.g. if user verified email, phone address
+}
+
+message SendMessageToAllUsersReq {
+  TokenInfos token = 1;
+  string message_type = 2;
+  EmailTemplate template = 3;
+}
+
+message SendMessageToStudyParticipantsReq {
+  TokenInfos token = 1;
+  string message_type = 2;
+  string study_key = 3;
+  EmailTemplate template = 4;
+  ExpressionArg condition = 5;
 }
 
 message SendEmailReq {
@@ -84,4 +104,19 @@ message DeleteEmailTemplateReq {
   TokenInfos token = 1;
   string study_key = 2;
   string message_type = 3;
+}
+
+message Expression {
+  string name = 1;
+  string returnType = 2;
+  repeated ExpressionArg data = 3;
+}
+
+message ExpressionArg {
+  string dtype = 1;
+  oneof data {
+    Expression exp = 2;
+    string str = 3;
+    double num = 4;
+  }
 }
