@@ -1,6 +1,7 @@
 package smtp_client
 
 import (
+	"crypto/tls"
 	"log"
 	"net/smtp"
 
@@ -40,7 +41,12 @@ func initConnectionPool(serverList SmtpServerList) []email.Pool {
 		if server.AuthData.Username == "" && server.AuthData.Password == "" {
 			auth = nil
 		}
-		var pool, err = email.NewPool(server.Address(), server.Connections, auth)
+
+		tlsOpts := &tls.Config{
+			InsecureSkipVerify: server.InsecureSkipVerify,
+			ServerName:         server.Host,
+		}
+		var pool, err = email.NewPool(server.Address(), server.Connections, auth, tlsOpts)
 		if err != nil {
 			log.Print("Error setting up connection pool for: " + server.Address())
 			continue

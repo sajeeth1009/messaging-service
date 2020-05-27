@@ -15,10 +15,11 @@ type SmtpServerList struct {
 }
 
 type SmtpServer struct {
-	Host        string `yaml:"host"`
-	Port        string `yaml:"port"`
-	Connections int    `yaml:"connections"`
-	AuthData    struct {
+	Host               string `yaml:"host"`
+	Port               string `yaml:"port"`
+	Connections        int    `yaml:"connections"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	AuthData           struct {
 		Username string `yaml:"user"`
 		Password string `yaml:"password"`
 	} `yaml:"auth"`

@@ -8,6 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
+	"github.com/influenzanet/messaging-service/pkg/bulk_messages"
 	"github.com/influenzanet/messaging-service/pkg/templates"
 	"github.com/influenzanet/messaging-service/pkg/types"
 	"github.com/influenzanet/messaging-service/pkg/utils"
@@ -27,6 +28,8 @@ func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.Se
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.Template == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+
+	go bulk_messages.AsynSendToAllUsers(s.clients)
 	return nil, status.Error(codes.Unimplemented, "unimplemented")
 	// use go method (don't wait for result since it can take long)
 	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
