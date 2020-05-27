@@ -42,16 +42,21 @@ func AsyncSendToAllUsers(
 		}
 		contentInfos := map[string]string{}
 
+		if user.Account.Type == "email" {
+			outgoingEmail.To = []string{user.Account.AccountId}
+		}
+
+		if user.Account.AccountConfirmedAt < 1 {
+			log.Println("message is not sent, if account not confirmed")
+			continue
+		}
 		if messageTemplate.MessageType == "newsletter" {
 			if !user.ContactPreferences.SubscribedToNewsletter {
 				// user does not want to get newsletter
 				continue
 			}
-			if user.Account.AccountConfirmedAt < 1 {
-				log.Println("newsletter is not sent, if account not confirmed")
-				continue
-			}
-			outgoingEmail.To = user.ContactPreferences.SendNewsletterTo
+
+			outgoingEmail.To = getEmailsByIds(user.ContactInfos, user.ContactPreferences.SendNewsletterTo)
 
 			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
 			if err != nil {
@@ -59,8 +64,13 @@ func AsyncSendToAllUsers(
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
-		} else if user.Account.Type == "email" {
-			outgoingEmail.To = []string{user.Account.AccountId}
+		} else if messageTemplate.MessageType == "study-reminder" {
+			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, 604800)
+			if err != nil {
+				log.Printf("AsyncSendToAllUsers: %v", err)
+				continue
+			}
+			contentInfos["loginToken"] = token
 		}
 
 		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
@@ -85,6 +95,20 @@ func AsyncSendToStudyParticipants(apiClients *types.APIClients) {
 	// define async methods to fetch users, check study states and trigger email sending here
 	// don't send to unconfirmed emails
 	// generate tempLogin, and unsubscribe tokens
+}
+
+func getEmailsByIds(contacts []*umAPI.ContactInfo, ids []string) []string {
+	emails := []string{}
+	for _, c := range contacts {
+		if c.Type == "email" {
+			for _, id := range ids {
+				if c.Id == id {
+					emails = append(emails, c.GetEmail())
+				}
+			}
+		}
+	}
+	return emails
 }
 
 func prepareContent(temp types.EmailTemplate, prefLang string, contentInfos map[string]string) (subject string, content string, err error) {
@@ -117,8 +141,11 @@ func sendMail(
 		Content:         mail.Content,
 	})
 	if err != nil {
+		log.Printf("Error when sending: %v", err)
 		_, errS := messageDBService.AddToOutgoingEmails(instanceID, mail)
-		log.Printf("Error when saving to outgoing: %v", errS)
+		if errS != nil {
+			log.Printf("Error when saving to outgoing: %v", err)
+		}
 		return
 	}
 

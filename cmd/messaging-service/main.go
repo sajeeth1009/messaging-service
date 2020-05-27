@@ -28,7 +28,7 @@ func initConfig() Config {
 	conf := Config{}
 	conf.Port = os.Getenv("MESSAGING_SERVICE_LISTEN_PORT")
 	conf.ServiceURLs.UserManagementService = os.Getenv("ADDR_USER_MANAGEMENT_SERVICE")
-	conf.ServiceURLs.UserManagementService = os.Getenv("ADDR_STUDY_SERVICE")
+	conf.ServiceURLs.StudyService = os.Getenv("ADDR_STUDY_SERVICE")
 	conf.ServiceURLs.EmailClientService = os.Getenv("ADDR_EMAIL_CLIENT_SERVICE")
 	conf.MessageDBConfig = config.GetMessageDBConfig()
 	return conf
