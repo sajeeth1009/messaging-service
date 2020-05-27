@@ -29,10 +29,22 @@ func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.Se
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	go bulk_messages.AsynSendToAllUsers(s.clients)
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
+	}
+
 	// use go method (don't wait for result since it can take long)
-	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
+	go bulk_messages.AsyncSendToAllUsers(
+		s.clients,
+		s.messageDBservice,
+		req.Token.InstanceId,
+		types.EmailTemplateFromAPI(req.Template),
+	)
+	return &api.ServiceStatus{
+		Msg:     "message sending triggered",
+		Status:  api.ServiceStatus_NORMAL,
+		Version: apiVersion,
+	}, nil
 }
 
 func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, req *api.SendMessageToStudyParticipantsReq) (*api.ServiceStatus, error) {

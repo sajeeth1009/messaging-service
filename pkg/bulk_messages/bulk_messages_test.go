@@ -19,9 +19,51 @@ func TestAsyncSendToStudyParticipants(t *testing.T) {
 }
 
 func TestGetTempLoginToken(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockUserClient := userMock.NewMockUserManagementApiClient(mockCtrl)
+
 	// with error response
+	t.Run("with error response", func(t *testing.T) {
+		mockUserClient.EXPECT().GenerateTempToken(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, status.Error(codes.InvalidArgument, "missing argument"))
+
+		_, err := getTemploginToken(
+			mockUserClient,
+			"testinstance",
+			&api.User{Account: &api.User_Account{AccountId: "test"}},
+			"teststudy",
+			60,
+		)
+		if err == nil {
+			t.Error("expected error")
+		}
+	})
+
 	// with get token
-	t.Error("test unimplemented")
+	t.Run("with normal token response", func(t *testing.T) {
+		mockUserClient.EXPECT().GenerateTempToken(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TempToken{Token: "testtoken"}, nil)
+
+		token, err := getTemploginToken(
+			mockUserClient,
+			"testinstance",
+			&api.User{Account: &api.User_Account{AccountId: "test"}},
+			"teststudy",
+			60,
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		if token != "testtoken" {
+			t.Errorf("unexpected token: %s", token)
+		}
+	})
 }
 
 func TestGetUnsubscribeToken(t *testing.T) {
@@ -36,7 +78,7 @@ func TestGetUnsubscribeToken(t *testing.T) {
 			gomock.Any(),
 		).Return(nil, status.Error(codes.InvalidArgument, "missing argument"))
 
-		_, err := getTemploginToken(mockUserClient, "testinstance", &api.User{Account: &api.User_Account{AccountId: "test"}})
+		_, err := getUnsubscribeToken(mockUserClient, "testinstance", &api.User{Account: &api.User_Account{AccountId: "test"}})
 		if err == nil {
 			t.Error("expected error")
 		}
@@ -49,7 +91,7 @@ func TestGetUnsubscribeToken(t *testing.T) {
 			gomock.Any(),
 		).Return(&api.TempToken{Token: "testtoken"}, nil)
 
-		token, err := getTemploginToken(mockUserClient, "testinstance", &api.User{Account: &api.User_Account{AccountId: "test"}})
+		token, err := getUnsubscribeToken(mockUserClient, "testinstance", &api.User{Account: &api.User_Account{AccountId: "test"}})
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
