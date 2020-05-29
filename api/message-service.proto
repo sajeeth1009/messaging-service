@@ -13,8 +13,9 @@ service MessagingServiceApi {
   rpc SendMessageToStudyParticipants(SendMessageToStudyParticipantsReq)
       returns (ServiceStatus);
 
-  // TODO:
-  // set/schedule automatic messages
+  rpc GetAutoMessages(GetAutoMessagesReq) returns (AutoMessages);
+  rpc SaveAutoMessage(SaveAutoMessageReq) returns (AutoMessage);
+  rpc DeleteAutoMessage(DeleteAutoMessageReq) returns (ServiceStatus);
 
   rpc GetEmailTemplates(GetEmailTemplatesReq) returns (EmailTemplates);
   rpc SaveEmailTemplate(SaveEmailTemplateReq) returns (EmailTemplate);
@@ -65,6 +66,29 @@ message SendEmailReq {
   string study_key = 4;
   string preferred_language = 5;
   map<string, string> content_infos = 6;
+}
+
+message AutoMessage {
+  string id = 1;
+  EmailTemplate template = 2;
+  string type = 3; // all-users - study-participants
+  string study_key = 4;
+  ExpressionArg condition = 5;
+  int64 next_time = 6; // when is the next time the message should be triggered
+  int64 period = 7;    // how often it should be triggered
+}
+
+message AutoMessages { repeated AutoMessage auto_messages = 1; }
+
+message GetAutoMessagesReq { TokenInfos token = 1; }
+message SaveAutoMessageReq {
+  TokenInfos token = 1;
+  AutoMessage auto_message = 2;
+}
+
+message DeleteAutoMessageReq {
+  TokenInfos token = 1;
+  string auto_message_id = 2;
 }
 
 message EmailTemplate {

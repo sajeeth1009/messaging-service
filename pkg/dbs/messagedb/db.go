@@ -54,6 +54,10 @@ func (dbService *MessageDBService) collectionRefEmailTemplates(instanceID string
 	return dbService.DBClient.Database(dbService.DBNamePrefix + instanceID + "_messageDB").Collection("email-templates")
 }
 
+func (dbService *MessageDBService) collectionRefAutoMessages(instanceID string) *mongo.Collection {
+	return dbService.DBClient.Database(dbService.DBNamePrefix + instanceID + "_messageDB").Collection("auto-messages")
+}
+
 func (dbService *MessageDBService) collectionRefOutgoingEmails(instanceID string) *mongo.Collection {
 	return dbService.DBClient.Database(dbService.DBNamePrefix + instanceID + "_messageDB").Collection("outgoing-emails")
 }
