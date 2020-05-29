@@ -101,7 +101,7 @@ func AsyncSendToStudyParticipants(
 ) {
 	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(), &umAPI.StreamUsersMsg{InstanceId: instanceID})
 	if err != nil {
-		log.Printf("AsyncSendToAllUsers: %v", err)
+		log.Printf("AsyncSendToStudyParticipants: %v", err)
 		return
 	}
 	for {
@@ -110,8 +110,13 @@ func AsyncSendToStudyParticipants(
 			break
 		}
 		if err != nil {
-			log.Printf("%v.AsyncSendToAllUsers(_) = _, %v", apiClients.UserManagementService, err)
+			log.Printf("%v.AsyncSendToStudyParticipants(_) = _, %v", apiClients.UserManagementService, err)
 			break
+		}
+
+		if user.Account.AccountConfirmedAt < 1 {
+			log.Println("message is not sent, if account not confirmed")
+			continue
 		}
 
 		profileIDs := make([]string, len(user.Profiles))
@@ -121,11 +126,13 @@ func AsyncSendToStudyParticipants(
 
 		// check if user is in the study with at least one profile
 		_, err = apiClients.StudyService.HasParticipantStateWithCondition(context.Background(), &studyAPI.ProfilesWithConditionReq{
+			InstanceId: instanceID,
 			ProfileIds: profileIDs,
 			StudyKey:   messageTemplate.StudyKey,
 			Condition:  expressionArgFromMessageToStudyAPI(condition),
 		})
 		if err != nil {
+			log.Println(err)
 			continue
 		}
 
@@ -143,10 +150,6 @@ func AsyncSendToStudyParticipants(
 			continue
 		}
 
-		if user.Account.AccountConfirmedAt < 1 {
-			log.Println("message is not sent, if account not confirmed")
-			continue
-		}
 		if messageTemplate.MessageType == "newsletter" {
 			if !user.ContactPreferences.SubscribedToNewsletter {
 				// user does not want to get newsletter

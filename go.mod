@@ -5,8 +5,8 @@ go 1.14
 require (
 	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.4.2
-	github.com/influenzanet/study-service v0.4.0
-	github.com/influenzanet/user-management-service v0.5.0
+	github.com/influenzanet/study-service v0.5.0
+	github.com/influenzanet/user-management-service v0.6.0
 	github.com/jordan-wright/email v0.0.0-20200521030443-c069f37d901d
 	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/net v0.0.0-20200528225125-3c3fba18258b // indirect

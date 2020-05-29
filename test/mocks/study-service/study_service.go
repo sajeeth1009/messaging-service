@@ -237,14 +237,14 @@ func (mr *MockStudyServiceApiClientMockRecorder) GetSurveyDefForStudy(arg0, arg1
 }
 
 // HasParticipantStateWithCondition mocks base method
-func (m *MockStudyServiceApiClient) HasParticipantStateWithCondition(arg0 context.Context, arg1 *api.ProfilesWithConditionReq, arg2 ...grpc.CallOption) (*api.AssignedSurveys, error) {
+func (m *MockStudyServiceApiClient) HasParticipantStateWithCondition(arg0 context.Context, arg1 *api.ProfilesWithConditionReq, arg2 ...grpc.CallOption) (*api.ServiceStatus, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "HasParticipantStateWithCondition", varargs...)
-	ret0, _ := ret[0].(*api.AssignedSurveys)
+	ret0, _ := ret[0].(*api.ServiceStatus)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
