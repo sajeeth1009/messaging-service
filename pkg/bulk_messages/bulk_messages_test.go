@@ -10,14 +10,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func TestAsyncSendToAllUsers(t *testing.T) {
-	t.Error("test unimplemented")
-}
-
-func TestAsyncSendToStudyParticipants(t *testing.T) {
-	t.Error("test unimplemented")
-}
-
 func TestGetTempLoginToken(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()

@@ -120,31 +120,9 @@ func TestSendMessageToStudyParticipantsEndpoint(t *testing.T) {
 				},
 			},
 		})
-		ok, msg := shouldHaveGrpcErrorStatus(err, "not authorized")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "no permission to send messages")
 		if !ok {
 			t.Error(msg)
-		}
-	})
-
-	t.Run("with valid user", func(t *testing.T) {
-		_, err := s.SendMessageToStudyParticipants(context.Background(), &api.SendMessageToStudyParticipantsReq{
-			Token: &api.TokenInfos{
-				Id:         "uid",
-				InstanceId: testInstanceID,
-				Payload: map[string]string{
-					"roles":    "PARTICIPANT,RESEARCHER",
-					"username": "testuser",
-				},
-			},
-			Template: &api.EmailTemplate{
-				MessageType: "newsletter",
-				Translations: []*api.LocalizedTemplate{
-					{Lang: "en", Subject: "test", TemplateDef: ""},
-				},
-			},
-		})
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
 		}
 	})
 }

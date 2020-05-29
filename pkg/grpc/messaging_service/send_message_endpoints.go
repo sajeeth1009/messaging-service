@@ -51,10 +51,24 @@ func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, re
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.StudyKey == "" || req.Template == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
+	}
+	req.Template.StudyKey = req.StudyKey
+
 	// use go method (don't wait for result since it can take long)
-	// there get stream of users - send message only if address confirmed, and contact for message purpose allowed
-	// check study-service with user profiles and given conditions
+	go bulk_messages.AsyncSendToStudyParticipants(
+		s.clients,
+		s.messageDBservice,
+		req.Token.InstanceId,
+		types.EmailTemplateFromAPI(req.Template),
+		req.Condition,
+	)
+	return &api.ServiceStatus{
+		Msg:     "message sending triggered",
+		Status:  api.ServiceStatus_NORMAL,
+		Version: apiVersion,
+	}, nil
 }
 
 func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEmailReq) (*api.ServiceStatus, error) {

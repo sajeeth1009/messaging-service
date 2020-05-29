@@ -8,9 +8,11 @@ import (
 	"time"
 
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
+	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/dbs/messagedb"
 	"github.com/influenzanet/messaging-service/pkg/templates"
 	"github.com/influenzanet/messaging-service/pkg/types"
+	studyAPI "github.com/influenzanet/study-service/pkg/api"
 	umAPI "github.com/influenzanet/user-management-service/pkg/api"
 )
 
@@ -20,7 +22,6 @@ func AsyncSendToAllUsers(
 	instanceID string,
 	messageTemplate types.EmailTemplate,
 ) {
-
 	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(), &umAPI.StreamUsersMsg{InstanceId: instanceID})
 	if err != nil {
 		log.Printf("AsyncSendToAllUsers: %v", err)
@@ -91,10 +92,139 @@ func AsyncSendToAllUsers(
 	}
 }
 
-func AsyncSendToStudyParticipants(apiClients *types.APIClients) {
-	// define async methods to fetch users, check study states and trigger email sending here
-	// don't send to unconfirmed emails
-	// generate tempLogin, and unsubscribe tokens
+func AsyncSendToStudyParticipants(
+	apiClients *types.APIClients,
+	messageDBService *messagedb.MessageDBService,
+	instanceID string,
+	messageTemplate types.EmailTemplate,
+	condition *api.ExpressionArg,
+) {
+	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(), &umAPI.StreamUsersMsg{InstanceId: instanceID})
+	if err != nil {
+		log.Printf("AsyncSendToAllUsers: %v", err)
+		return
+	}
+	for {
+		user, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Printf("%v.AsyncSendToAllUsers(_) = _, %v", apiClients.UserManagementService, err)
+			break
+		}
+
+		profileIDs := make([]string, len(user.Profiles))
+		for i, p := range user.Profiles {
+			profileIDs[i] = p.Id
+		}
+
+		// check if user is in the study with at least one profile
+		_, err = apiClients.StudyService.HasParticipantStateWithCondition(context.Background(), &studyAPI.ProfilesWithConditionReq{
+			ProfileIds: profileIDs,
+			StudyKey:   messageTemplate.StudyKey,
+			Condition:  expressionArgFromMessageToStudyAPI(condition),
+		})
+		if err != nil {
+			continue
+		}
+
+		// user profile in study with valid condition
+		outgoingEmail := types.OutgoingEmail{
+			MessageType:     messageTemplate.MessageType,
+			HeaderOverrides: messageTemplate.HeaderOverrides,
+		}
+		contentInfos := map[string]string{}
+
+		if user.Account.Type == "email" {
+			outgoingEmail.To = []string{user.Account.AccountId}
+		} else {
+			log.Println("AsyncSendToStudyParticipants: account type not supported yet.")
+			continue
+		}
+
+		if user.Account.AccountConfirmedAt < 1 {
+			log.Println("message is not sent, if account not confirmed")
+			continue
+		}
+		if messageTemplate.MessageType == "newsletter" {
+			if !user.ContactPreferences.SubscribedToNewsletter {
+				// user does not want to get newsletter
+				continue
+			}
+
+			outgoingEmail.To = getEmailsByIds(user.ContactInfos, user.ContactPreferences.SendNewsletterTo)
+
+			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
+			if err != nil {
+				log.Printf("AsyncSendToAllUsers: %v", err)
+				continue
+			}
+			contentInfos["unsubscribeToken"] = token
+		} else if messageTemplate.MessageType == "study-reminder" {
+			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, 604800)
+			if err != nil {
+				log.Printf("AsyncSendToAllUsers: %v", err)
+				continue
+			}
+			contentInfos["loginToken"] = token
+		}
+
+		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
+		if err != nil {
+			log.Printf("AsyncSendToAllUsers: %v", err)
+			continue
+		}
+
+		outgoingEmail.Subject = subject
+		outgoingEmail.Content = content
+
+		go sendMail(
+			apiClients.EmailClientService,
+			instanceID,
+			messageDBService,
+			outgoingEmail,
+		)
+	}
+}
+
+func expressionArgFromMessageToStudyAPI(arg *api.ExpressionArg) *studyAPI.ExpressionArg {
+	if arg == nil {
+		return nil
+	}
+	newArg := &studyAPI.ExpressionArg{
+		Dtype: arg.Dtype,
+	}
+	switch x := arg.Data.(type) {
+	case *api.ExpressionArg_Exp:
+		newArg.Data = &studyAPI.ExpressionArg_Exp{Exp: expressionFromMessageToStudyAPI(arg.GetExp())}
+	case *api.ExpressionArg_Str:
+		newArg.Data = &studyAPI.ExpressionArg_Str{Str: arg.GetStr()}
+	case *api.ExpressionArg_Num:
+		newArg.Data = &studyAPI.ExpressionArg_Num{Num: arg.GetNum()}
+	case nil:
+		// The field is not set.
+	default:
+		log.Printf("api.ExpressionArg has unexpected type %T", x)
+	}
+
+	return newArg
+}
+
+func expressionFromMessageToStudyAPI(arg *api.Expression) *studyAPI.Expression {
+	if arg == nil {
+		return nil
+	}
+	newArg := &studyAPI.Expression{
+		Name:       arg.Name,
+		ReturnType: arg.ReturnType,
+	}
+	data := make([]*studyAPI.ExpressionArg, len(arg.Data))
+	for i, d := range arg.Data {
+		data[i] = expressionArgFromMessageToStudyAPI(d)
+	}
+	newArg.Data = data
+	return newArg
 }
 
 func getEmailsByIds(contacts []*umAPI.ContactInfo, ids []string) []string {
