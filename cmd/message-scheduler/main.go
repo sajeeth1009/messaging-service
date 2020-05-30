@@ -9,6 +9,7 @@ import (
 
 	"github.com/influenzanet/messaging-service/internal/config"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
+	"github.com/influenzanet/messaging-service/pkg/bulk_messages"
 	"github.com/influenzanet/messaging-service/pkg/dbs/globaldb"
 	"github.com/influenzanet/messaging-service/pkg/dbs/messagedb"
 	gc "github.com/influenzanet/messaging-service/pkg/grpc/clients"
@@ -106,5 +107,49 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 }
 
 func handleAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients) {
-	log.Println("todo: fetch and try to send automatice messages if due")
+	instances, err := gdb.GetAllInstances()
+	if err != nil {
+		log.Printf("handleAutoMessages.GetAllInstances: %v", err)
+	}
+	for _, instance := range instances {
+		activeMessages, err := mdb.FindAutoMessages(instance.InstanceID, true)
+		if err != nil {
+			log.Printf("handleAutoMessages.FindAutoMessages for %s: %v", instance.InstanceID, err)
+			continue
+		}
+		if len(activeMessages) < 1 {
+			continue
+		}
+
+		for _, messageDef := range activeMessages {
+			switch messageDef.Type {
+			case "all-users":
+				go bulk_messages.AsyncSendToAllUsers(
+					clients,
+					mdb,
+					instance.InstanceID,
+					messageDef.Template,
+				)
+			case "study-participants":
+				messageDef.Template.StudyKey = messageDef.StudyKey
+				go bulk_messages.AsyncSendToStudyParticipants(
+					clients,
+					mdb,
+					instance.InstanceID,
+					messageDef.Template,
+					messageDef.Condition.ToAPI(),
+				)
+			default:
+				log.Printf("handleAutoMessages: message type unknown: %s", messageDef.Type)
+			}
+
+			messageDef.NextTime += messageDef.Period
+			_, err := mdb.SaveAutoMessage(instance.InstanceID, messageDef)
+			if err != nil {
+				log.Printf("handleAutoMessages.SaveAutoMessage for %s: %v", instance.InstanceID, err)
+				continue
+			}
+		}
+	}
+
 }
