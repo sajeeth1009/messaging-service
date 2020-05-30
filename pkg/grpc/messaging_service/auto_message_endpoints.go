@@ -4,6 +4,7 @@ import (
 	"context"
 
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
+	"github.com/influenzanet/messaging-service/pkg/types"
 	"github.com/influenzanet/messaging-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,20 +18,18 @@ func (s *messagingServer) GetAutoMessages(ctx context.Context, req *api.GetAutoM
 	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
-	/*
-		templates, err := s.messageDBservice.FindAllEmailTempates(req.Token.InstanceId)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	autoMessages, err := s.messageDBservice.FindAutoMessages(req.Token.InstanceId, false)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-		resp := &api.EmailTemplates{
-			Templates: make([]*api.EmailTemplate, len(templates)),
-		}
-		for i, v := range templates {
-			resp.Templates[i] = v.ToAPI()
-		}
-		return resp, nil*/
+	resp := &api.AutoMessages{
+		AutoMessages: make([]*api.AutoMessage, len(autoMessages)),
+	}
+	for i, v := range autoMessages {
+		resp.AutoMessages[i] = v.ToAPI()
+	}
+	return resp, nil
 }
 
 func (s *messagingServer) SaveAutoMessage(ctx context.Context, req *api.SaveAutoMessageReq) (*api.AutoMessage, error) {
@@ -41,13 +40,12 @@ func (s *messagingServer) SaveAutoMessage(ctx context.Context, req *api.SaveAuto
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
-	/*templ := types.EmailTemplateFromAPI(req.Template)
-	templ, err := s.messageDBservice.SaveEmailTemplate(req.Token.InstanceId, templ)
+	reqMsg := types.AutoMessageFromAPI(req.AutoMessage)
+	autoMsg, err := s.messageDBservice.SaveAutoMessage(req.Token.InstanceId, *reqMsg)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	return templ.ToAPI(), nil*/
+	return autoMsg.ToAPI(), nil
 }
 
 func (s *messagingServer) DeleteAutoMessage(ctx context.Context, req *api.DeleteAutoMessageReq) (*api.ServiceStatus, error) {
@@ -57,13 +55,12 @@ func (s *messagingServer) DeleteAutoMessage(ctx context.Context, req *api.Delete
 	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
-	/*err := s.messageDBservice.DeleteEmailTemplate(req.Token.InstanceId, req.MessageType, req.StudyKey)
+	err := s.messageDBservice.DeleteAutoMessage(req.Token.InstanceId, req.AutoMessageId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &api.ServiceStatus{
 		Status: api.ServiceStatus_NORMAL,
-		Msg:    "template deleted",
-	}, nil*/
+		Msg:    "auto message deleted",
+	}, nil
 }
