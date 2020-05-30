@@ -1,0 +1,1 @@
+docker run --env-file message-scheduler-env.list github.com/influenzanet/message-scheduler:$1
