@@ -171,6 +171,7 @@ func AsyncSendToStudyParticipants(
 				continue
 			}
 			contentInfos["loginToken"] = token
+			contentInfos["studyKey"] = messageTemplate.StudyKey
 		}
 
 		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
