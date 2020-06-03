@@ -18,7 +18,7 @@ type Config struct {
 func initConfig() Config {
 	conf := Config{}
 	conf.Port = os.Getenv("EMAIL_CLIENT_SERVICE_LISTEN_PORT")
-	conf.ServerConfigPath = os.Getenv("SMTP_SERVER_CONFIG_PATH")
+	conf.ServerConfigPath = os.Getenv("MESSAGING_CONFIG_FOLDER") + "/smtp-servers.yaml"
 	return conf
 }
 
