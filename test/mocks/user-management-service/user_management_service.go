@@ -257,6 +257,26 @@ func (mr *MockUserManagementApiClientMockRecorder) GetInfosForPasswordReset(arg0
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInfosForPasswordReset", reflect.TypeOf((*MockUserManagementApiClient)(nil).GetInfosForPasswordReset), varargs...)
 }
 
+// GetOrCreateTemptoken mocks base method
+func (m *MockUserManagementApiClient) GetOrCreateTemptoken(arg0 context.Context, arg1 *api.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempToken, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetOrCreateTemptoken", varargs...)
+	ret0, _ := ret[0].(*api.TempToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrCreateTemptoken indicates an expected call of GetOrCreateTemptoken
+func (mr *MockUserManagementApiClientMockRecorder) GetOrCreateTemptoken(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrCreateTemptoken", reflect.TypeOf((*MockUserManagementApiClient)(nil).GetOrCreateTemptoken), varargs...)
+}
+
 // GetTempTokens mocks base method
 func (m *MockUserManagementApiClient) GetTempTokens(arg0 context.Context, arg1 *api.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempTokenInfos, error) {
 	m.ctrl.T.Helper()
@@ -318,14 +338,14 @@ func (mr *MockUserManagementApiClientMockRecorder) InitiatePasswordReset(arg0, a
 }
 
 // LoginWithEmail mocks base method
-func (m *MockUserManagementApiClient) LoginWithEmail(arg0 context.Context, arg1 *api.LoginWithEmailMsg, arg2 ...grpc.CallOption) (*api.TokenResponse, error) {
+func (m *MockUserManagementApiClient) LoginWithEmail(arg0 context.Context, arg1 *api.LoginWithEmailMsg, arg2 ...grpc.CallOption) (*api.LoginResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "LoginWithEmail", varargs...)
-	ret0, _ := ret[0].(*api.TokenResponse)
+	ret0, _ := ret[0].(*api.LoginResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -338,14 +358,14 @@ func (mr *MockUserManagementApiClientMockRecorder) LoginWithEmail(arg0, arg1 int
 }
 
 // LoginWithTempToken mocks base method
-func (m *MockUserManagementApiClient) LoginWithTempToken(arg0 context.Context, arg1 *api.JWTRequest, arg2 ...grpc.CallOption) (*api.TokenResponse, error) {
+func (m *MockUserManagementApiClient) LoginWithTempToken(arg0 context.Context, arg1 *api.JWTRequest, arg2 ...grpc.CallOption) (*api.LoginResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "LoginWithTempToken", varargs...)
-	ret0, _ := ret[0].(*api.TokenResponse)
+	ret0, _ := ret[0].(*api.LoginResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

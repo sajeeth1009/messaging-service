@@ -196,6 +196,26 @@ func (mr *MockStudyServiceApiClientMockRecorder) GetStudy(arg0, arg1 interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudy", reflect.TypeOf((*MockStudyServiceApiClient)(nil).GetStudy), varargs...)
 }
 
+// GetStudyResponseStatistics mocks base method
+func (m *MockStudyServiceApiClient) GetStudyResponseStatistics(arg0 context.Context, arg1 *api.SurveyResponseQuery, arg2 ...grpc.CallOption) (*api.StudyResponseStatistics, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetStudyResponseStatistics", varargs...)
+	ret0, _ := ret[0].(*api.StudyResponseStatistics)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStudyResponseStatistics indicates an expected call of GetStudyResponseStatistics
+func (mr *MockStudyServiceApiClientMockRecorder) GetStudyResponseStatistics(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStudyResponseStatistics", reflect.TypeOf((*MockStudyServiceApiClient)(nil).GetStudyResponseStatistics), varargs...)
+}
+
 // GetStudySurveyInfos mocks base method
 func (m *MockStudyServiceApiClient) GetStudySurveyInfos(arg0 context.Context, arg1 *api.StudyReferenceReq, arg2 ...grpc.CallOption) (*api.SurveyInfoResp, error) {
 	m.ctrl.T.Helper()
@@ -354,6 +374,26 @@ func (mr *MockStudyServiceApiClientMockRecorder) Status(arg0, arg1 interface{}, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockStudyServiceApiClient)(nil).Status), varargs...)
+}
+
+// StreamStudyResponses mocks base method
+func (m *MockStudyServiceApiClient) StreamStudyResponses(arg0 context.Context, arg1 *api.SurveyResponseQuery, arg2 ...grpc.CallOption) (api.StudyServiceApi_StreamStudyResponsesClient, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "StreamStudyResponses", varargs...)
+	ret0, _ := ret[0].(api.StudyServiceApi_StreamStudyResponsesClient)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StreamStudyResponses indicates an expected call of StreamStudyResponses
+func (mr *MockStudyServiceApiClientMockRecorder) StreamStudyResponses(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamStudyResponses", reflect.TypeOf((*MockStudyServiceApiClient)(nil).StreamStudyResponses), varargs...)
 }
 
 // SubmitResponse mocks base method

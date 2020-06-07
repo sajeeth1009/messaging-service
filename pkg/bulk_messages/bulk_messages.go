@@ -316,7 +316,7 @@ func getUnsubscribeToken(
 	instanceID string,
 	user *umAPI.User,
 ) (token string, err error) {
-	resp, err := userClient.GenerateTempToken(context.Background(), &umAPI.TempTokenInfo{
+	resp, err := userClient.GetOrCreateTemptoken(context.Background(), &umAPI.TempTokenInfo{
 		UserId:     user.Id,
 		Purpose:    "unsubscribe-newsletter",
 		InstanceId: instanceID,
