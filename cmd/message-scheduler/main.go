@@ -72,12 +72,13 @@ func main() {
 }
 
 func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients) {
+
 	instances, err := gdb.GetAllInstances()
 	if err != nil {
 		log.Printf("handleOutgoingEmails.GetAllInstances: %v", err)
 	}
 	for _, instance := range instances {
-		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 20)
+		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500)
 		if err != nil {
 			log.Printf("handleOutgoingEmails.FetchOutgoingEmails for %s: %v", instance.InstanceID, err)
 			continue
@@ -85,6 +86,7 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 		if len(emails) < 1 {
 			continue
 		}
+		log.Printf("%d outgoing emails found in instance %s", len(emails), instance.InstanceID)
 		for _, email := range emails {
 			_, err := clients.EmailClientService.SendEmail(context.Background(), &emailAPI.SendEmailReq{
 				To:              email.To,
@@ -93,14 +95,17 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 				Content:         email.Content,
 			})
 			if err != nil {
+				log.Printf("Could not send email in instance %s, save to outgoing.", instance.InstanceID)
 				_, errS := mdb.AddToOutgoingEmails(instance.InstanceID, email)
-				log.Printf("Saving to outgoing: %v", errS)
+				if errS != nil {
+					log.Printf("Error while saving to outgoing: %v", errS)
+				}
 				continue
 			}
 
 			_, err = mdb.AddToSentEmails(instance.InstanceID, email)
 			if err != nil {
-				log.Printf("Saving to sent: %v", err)
+				log.Printf("Error while saving to sent: %v", err)
 			}
 		}
 	}

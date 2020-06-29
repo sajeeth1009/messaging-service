@@ -278,7 +278,7 @@ func sendMail(
 		log.Printf("Error when sending: %v", err)
 		_, errS := messageDBService.AddToOutgoingEmails(instanceID, mail)
 		if errS != nil {
-			log.Printf("Error when saving to outgoing: %v", err)
+			log.Printf("Error while saving to outgoing: %v", errS)
 		}
 		return
 	}

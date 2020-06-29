@@ -115,11 +115,11 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
 	if err != nil {
 		_, errS := s.messageDBservice.AddToOutgoingEmails(req.InstanceId, outgoingEmail)
 		if errS != nil {
-			log.Printf("Saving to outgoing: %v", errS)
+			log.Printf("Error while saving to outgoing: %v", errS)
 		}
 		return &api.ServiceStatus{
 			Version: apiVersion,
-			Msg:     "failed sending message, added to outgoind",
+			Msg:     "failed sending message, added to outgoing",
 			Status:  api.ServiceStatus_PROBLEM,
 		}, nil
 	}
