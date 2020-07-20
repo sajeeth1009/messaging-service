@@ -65,7 +65,7 @@ func TestGetUnsubscribeToken(t *testing.T) {
 
 	// with error response
 	t.Run("with error response", func(t *testing.T) {
-		mockUserClient.EXPECT().GenerateTempToken(
+		mockUserClient.EXPECT().GetOrCreateTemptoken(
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, status.Error(codes.InvalidArgument, "missing argument"))
@@ -78,7 +78,7 @@ func TestGetUnsubscribeToken(t *testing.T) {
 
 	// with get token
 	t.Run("with normal token response", func(t *testing.T) {
-		mockUserClient.EXPECT().GenerateTempToken(
+		mockUserClient.EXPECT().GetOrCreateTemptoken(
 			gomock.Any(),
 			gomock.Any(),
 		).Return(&api.TempToken{Token: "testtoken"}, nil)

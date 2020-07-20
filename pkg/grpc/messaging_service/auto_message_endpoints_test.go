@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/influenzanet/go-utils/pkg/api_types"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
 )
@@ -43,7 +44,7 @@ func TestGetAutoMessagesEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		resp, err := s.GetAutoMessages(context.Background(), &api.GetAutoMessagesReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "uid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -69,7 +70,7 @@ func TestSaveAutoMessageEndpoint(t *testing.T) {
 		messageDBservice: testMessageDBService,
 	}
 
-	userToken := &api.TokenInfos{
+	userToken := &api_types.TokenInfos{
 		Id:         "uid",
 		InstanceId: testInstanceID,
 		Payload: map[string]string{
@@ -128,7 +129,7 @@ func TestDeleteAutoMessageEndpoint(t *testing.T) {
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
 	}
-	userToken := &api.TokenInfos{
+	userToken := &api_types.TokenInfos{
 		Id:         "uid",
 		InstanceId: testInstanceID,
 		Payload: map[string]string{

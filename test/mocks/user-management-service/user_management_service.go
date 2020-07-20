@@ -7,6 +7,7 @@ package mock_api
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	api "github.com/influenzanet/user-management-service/pkg/api"
 	grpc "google.golang.org/grpc"
 	metadata "google.golang.org/grpc/metadata"
@@ -75,6 +76,26 @@ func (mr *MockUserManagementApiClientMockRecorder) AddRoleForUser(arg0, arg1 int
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddRoleForUser", reflect.TypeOf((*MockUserManagementApiClient)(nil).AddRoleForUser), varargs...)
+}
+
+// AutoValidateTempToken mocks base method
+func (m *MockUserManagementApiClient) AutoValidateTempToken(arg0 context.Context, arg1 *api.AutoValidateReq, arg2 ...grpc.CallOption) (*api.AutoValidateResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AutoValidateTempToken", varargs...)
+	ret0, _ := ret[0].(*api.AutoValidateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AutoValidateTempToken indicates an expected call of AutoValidateTempToken
+func (mr *MockUserManagementApiClientMockRecorder) AutoValidateTempToken(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutoValidateTempToken", reflect.TypeOf((*MockUserManagementApiClient)(nil).AutoValidateTempToken), varargs...)
 }
 
 // ChangeAccountIDEmail mocks base method
@@ -218,7 +239,7 @@ func (mr *MockUserManagementApiClientMockRecorder) FindNonParticipantUsers(arg0,
 }
 
 // GenerateTempToken mocks base method
-func (m *MockUserManagementApiClient) GenerateTempToken(arg0 context.Context, arg1 *api.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempToken, error) {
+func (m *MockUserManagementApiClient) GenerateTempToken(arg0 context.Context, arg1 *api_types.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempToken, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -258,7 +279,7 @@ func (mr *MockUserManagementApiClientMockRecorder) GetInfosForPasswordReset(arg0
 }
 
 // GetOrCreateTemptoken mocks base method
-func (m *MockUserManagementApiClient) GetOrCreateTemptoken(arg0 context.Context, arg1 *api.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempToken, error) {
+func (m *MockUserManagementApiClient) GetOrCreateTemptoken(arg0 context.Context, arg1 *api_types.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempToken, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -278,14 +299,14 @@ func (mr *MockUserManagementApiClientMockRecorder) GetOrCreateTemptoken(arg0, ar
 }
 
 // GetTempTokens mocks base method
-func (m *MockUserManagementApiClient) GetTempTokens(arg0 context.Context, arg1 *api.TempTokenInfo, arg2 ...grpc.CallOption) (*api.TempTokenInfos, error) {
+func (m *MockUserManagementApiClient) GetTempTokens(arg0 context.Context, arg1 *api_types.TempTokenInfo, arg2 ...grpc.CallOption) (*api_types.TempTokenInfos, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetTempTokens", varargs...)
-	ret0, _ := ret[0].(*api.TempTokenInfos)
+	ret0, _ := ret[0].(*api_types.TempTokenInfos)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -357,28 +378,8 @@ func (mr *MockUserManagementApiClientMockRecorder) LoginWithEmail(arg0, arg1 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoginWithEmail", reflect.TypeOf((*MockUserManagementApiClient)(nil).LoginWithEmail), varargs...)
 }
 
-// LoginWithTempToken mocks base method
-func (m *MockUserManagementApiClient) LoginWithTempToken(arg0 context.Context, arg1 *api.JWTRequest, arg2 ...grpc.CallOption) (*api.LoginResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "LoginWithTempToken", varargs...)
-	ret0, _ := ret[0].(*api.LoginResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// LoginWithTempToken indicates an expected call of LoginWithTempToken
-func (mr *MockUserManagementApiClientMockRecorder) LoginWithTempToken(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoginWithTempToken", reflect.TypeOf((*MockUserManagementApiClient)(nil).LoginWithTempToken), varargs...)
-}
-
 // PurgeUserTempTokens mocks base method
-func (m *MockUserManagementApiClient) PurgeUserTempTokens(arg0 context.Context, arg1 *api.TempTokenInfo, arg2 ...grpc.CallOption) (*api.ServiceStatus, error) {
+func (m *MockUserManagementApiClient) PurgeUserTempTokens(arg0 context.Context, arg1 *api_types.TempTokenInfo, arg2 ...grpc.CallOption) (*api.ServiceStatus, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -557,6 +558,26 @@ func (mr *MockUserManagementApiClientMockRecorder) SaveProfile(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveProfile", reflect.TypeOf((*MockUserManagementApiClient)(nil).SaveProfile), varargs...)
 }
 
+// SendVerificationCode mocks base method
+func (m *MockUserManagementApiClient) SendVerificationCode(arg0 context.Context, arg1 *api.SendVerificationCodeReq, arg2 ...grpc.CallOption) (*api.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SendVerificationCode", varargs...)
+	ret0, _ := ret[0].(*api.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendVerificationCode indicates an expected call of SendVerificationCode
+func (mr *MockUserManagementApiClientMockRecorder) SendVerificationCode(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendVerificationCode", reflect.TypeOf((*MockUserManagementApiClient)(nil).SendVerificationCode), varargs...)
+}
+
 // SignupWithEmail mocks base method
 func (m *MockUserManagementApiClient) SignupWithEmail(arg0 context.Context, arg1 *api.SignupWithEmailMsg, arg2 ...grpc.CallOption) (*api.TokenResponse, error) {
 	m.ctrl.T.Helper()
@@ -698,14 +719,14 @@ func (mr *MockUserManagementApiClientMockRecorder) ValidateAppToken(arg0, arg1 i
 }
 
 // ValidateJWT mocks base method
-func (m *MockUserManagementApiClient) ValidateJWT(arg0 context.Context, arg1 *api.JWTRequest, arg2 ...grpc.CallOption) (*api.TokenInfos, error) {
+func (m *MockUserManagementApiClient) ValidateJWT(arg0 context.Context, arg1 *api.JWTRequest, arg2 ...grpc.CallOption) (*api_types.TokenInfos, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ValidateJWT", varargs...)
-	ret0, _ := ret[0].(*api.TokenInfos)
+	ret0, _ := ret[0].(*api_types.TokenInfos)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -1,10 +1,10 @@
 .PHONY: test api mock docker-email-client docker-message-scheduler docker-messaging-service
 
 PROTO_BUILD_DIR = ../../..
-PROTO_TARGET = ./pkg/api
+
 DOCKER_OPTS ?= --rm
 
-#TEST_ARGS = -v
+# TEST_ARGS = -v | grep -c RUN
 VERSION := $(shell git describe --tags --abbrev=0)
 
 help:
@@ -20,8 +20,9 @@ help:
 	@echo "  TEST_ARGS : Arguments to pass to go test call"
 
 api:
-	find "$(PROTO_TARGET)" -type f -delete
-	find ./api/*.proto -maxdepth 1 -type f -exec protoc {} --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
+	if [ ! -d "./pkg/api" ]; then mkdir -p "./pkg/api"; else  find "./pkg/api" -type f -delete &&  mkdir -p "./pkg/api"; fi
+	find ./api/email_client_service/*.proto -maxdepth 1 -type f -exec protoc {} --proto_path=./api --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
+	find ./api/messaging_service/*.proto -maxdepth 1 -type f -exec protoc {} --proto_path=./api --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
 
 mock:
 	mockgen -source=./pkg/api/email_client_service/email-client-service.pb.go EmailClientServiceApiClient > test/mocks/email-client-service/email_client_service.go

@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/influenzanet/go-utils/pkg/api_types"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/dbs/messagedb"
@@ -296,7 +297,7 @@ func getTemploginToken(
 	studyKey string,
 	expiresIn int64,
 ) (token string, err error) {
-	resp, err := userClient.GenerateTempToken(context.Background(), &umAPI.TempTokenInfo{
+	resp, err := userClient.GenerateTempToken(context.Background(), &api_types.TempTokenInfo{
 		UserId:     user.Id,
 		Purpose:    "survey-login",
 		InstanceId: instanceID,
@@ -316,7 +317,7 @@ func getUnsubscribeToken(
 	instanceID string,
 	user *umAPI.User,
 ) (token string, err error) {
-	resp, err := userClient.GetOrCreateTemptoken(context.Background(), &umAPI.TempTokenInfo{
+	resp, err := userClient.GetOrCreateTemptoken(context.Background(), &api_types.TempTokenInfo{
 		UserId:     user.Id,
 		Purpose:    "unsubscribe-newsletter",
 		InstanceId: instanceID,

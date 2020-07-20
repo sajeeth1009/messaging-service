@@ -1,0 +1,12 @@
+from: <sender-address>
+fromName: Testclient
+servers:
+- host: <smtp-addr>
+  port: <smtp-port>
+  connections: 4
+  insecureSkipVerify: true
+  auth:
+    user:
+    password:
+sendTo:
+- your@address.org

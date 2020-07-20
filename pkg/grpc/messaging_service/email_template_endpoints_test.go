@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/influenzanet/go-utils/pkg/api_types"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
 )
@@ -42,7 +43,7 @@ func TestGetEmailTemplatesEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		resp, err := s.GetEmailTemplates(context.Background(), &api.GetEmailTemplatesReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "uid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -68,7 +69,7 @@ func TestSaveEmailTemplateEndpoint(t *testing.T) {
 		messageDBservice: testMessageDBService,
 	}
 
-	userToken := &api.TokenInfos{
+	userToken := &api_types.TokenInfos{
 		Id:         "uid",
 		InstanceId: testInstanceID,
 		Payload: map[string]string{
@@ -156,7 +157,7 @@ func TestDeleteEmailTemplateEndpoint(t *testing.T) {
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
 	}
-	userToken := &api.TokenInfos{
+	userToken := &api_types.TokenInfos{
 		Id:         "uid",
 		InstanceId: testInstanceID,
 		Payload: map[string]string{

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/influenzanet/go-utils/pkg/api_types"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
 	emailMock "github.com/influenzanet/messaging-service/test/mocks/email-client-service"
@@ -46,7 +47,7 @@ func TestSendMessageToAllUsersEndpoint(t *testing.T) {
 
 	t.Run("with non admin user", func(t *testing.T) {
 		_, err := s.SendMessageToAllUsers(context.Background(), &api.SendMessageToAllUsersReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "uid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -104,7 +105,7 @@ func TestSendMessageToStudyParticipantsEndpoint(t *testing.T) {
 
 	t.Run("with non admin user", func(t *testing.T) {
 		_, err := s.SendMessageToStudyParticipants(context.Background(), &api.SendMessageToStudyParticipantsReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "uid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
