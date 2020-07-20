@@ -3,19 +3,20 @@ package messaging_service
 import (
 	"context"
 
+	"github.com/influenzanet/go-utils/pkg/token_checks"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
-	"github.com/influenzanet/messaging-service/pkg/utils"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *messagingServer) GetEmailTemplates(ctx context.Context, req *api.GetEmailTemplatesReq) (*api.EmailTemplates, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 	templates, err := s.messageDBservice.FindAllEmailTempates(req.Token.InstanceId)
@@ -33,10 +34,10 @@ func (s *messagingServer) GetEmailTemplates(ctx context.Context, req *api.GetEma
 }
 
 func (s *messagingServer) SaveEmailTemplate(ctx context.Context, req *api.SaveEmailTemplateReq) (*api.EmailTemplate, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.Template.MessageType == "" {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.Template.MessageType == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
@@ -49,10 +50,10 @@ func (s *messagingServer) SaveEmailTemplate(ctx context.Context, req *api.SaveEm
 }
 
 func (s *messagingServer) DeleteEmailTemplate(ctx context.Context, req *api.DeleteEmailTemplateReq) (*api.ServiceStatus, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.MessageType == "" {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.MessageType == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 	err := s.messageDBservice.DeleteEmailTemplate(req.Token.InstanceId, req.MessageType, req.StudyKey)

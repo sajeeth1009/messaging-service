@@ -6,12 +6,13 @@ import (
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/influenzanet/go-utils/pkg/token_checks"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/bulk_messages"
 	"github.com/influenzanet/messaging-service/pkg/templates"
 	"github.com/influenzanet/messaging-service/pkg/types"
-	"github.com/influenzanet/messaging-service/pkg/utils"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -25,11 +26,11 @@ func (s *messagingServer) Status(ctx context.Context, _ *empty.Empty) (*api.Serv
 }
 
 func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.SendMessageToAllUsersReq) (*api.ServiceStatus, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.Template == nil {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.Template == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
 	}
 
@@ -48,10 +49,10 @@ func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.Se
 }
 
 func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, req *api.SendMessageToStudyParticipantsReq) (*api.ServiceStatus, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.StudyKey == "" || req.Template == nil {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.StudyKey == "" || req.Template == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
 	}
 	req.Template.StudyKey = req.StudyKey

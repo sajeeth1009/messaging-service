@@ -3,19 +3,20 @@ package messaging_service
 import (
 	"context"
 
+	"github.com/influenzanet/go-utils/pkg/token_checks"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
-	"github.com/influenzanet/messaging-service/pkg/utils"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *messagingServer) GetAutoMessages(ctx context.Context, req *api.GetAutoMessagesReq) (*api.AutoMessages, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 	autoMessages, err := s.messageDBservice.FindAutoMessages(req.Token.InstanceId, false)
@@ -33,10 +34,10 @@ func (s *messagingServer) GetAutoMessages(ctx context.Context, req *api.GetAutoM
 }
 
 func (s *messagingServer) SaveAutoMessage(ctx context.Context, req *api.SaveAutoMessageReq) (*api.AutoMessage, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.AutoMessage == nil {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.AutoMessage == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
@@ -49,10 +50,10 @@ func (s *messagingServer) SaveAutoMessage(ctx context.Context, req *api.SaveAuto
 }
 
 func (s *messagingServer) DeleteAutoMessage(ctx context.Context, req *api.DeleteAutoMessageReq) (*api.ServiceStatus, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.AutoMessageId == "" {
+	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.AutoMessageId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !utils.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 	err := s.messageDBservice.DeleteAutoMessage(req.Token.InstanceId, req.AutoMessageId)

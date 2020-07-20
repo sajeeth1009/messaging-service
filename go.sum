@@ -85,6 +85,8 @@ github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/influenzanet/go-utils v0.0.0-20200719205359-4796ff908160 h1:lDiA+vgxJFkVJ/634f3P6XBZ4S7S2DIFRaLCeAiqd9s=
 github.com/influenzanet/go-utils v0.0.0-20200719205359-4796ff908160/go.mod h1:OY5GbpOVq5aUj5r9wxUxRKXIAMQ7CxeHGL9YpmOvObY=
+github.com/influenzanet/go-utils v0.0.0-20200720123801-a189fee40438 h1:mSV55g7u/k0Nr0F/AsXccHRfBxFR8AR0ZL56rsg/IoQ=
+github.com/influenzanet/go-utils v0.0.0-20200720123801-a189fee40438/go.mod h1:OY5GbpOVq5aUj5r9wxUxRKXIAMQ7CxeHGL9YpmOvObY=
 github.com/influenzanet/messaging-service v0.2.0/go.mod h1:11yQIQT4x91kVVGQw4/H4YgHxaKdhDBGz84f8kZvC1g=
 github.com/influenzanet/messaging-service v0.5.3/go.mod h1:Ev3V4sjuqYEBdj1N5fQfAMY17codvLGUXs59qR7y3tc=
 github.com/influenzanet/study-service v0.6.2 h1:kBsCnfuC8WDpWkZmpsaqxg++aFVkReFK4DT+uf/DCsM=
