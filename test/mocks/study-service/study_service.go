@@ -7,6 +7,7 @@ package mock_api
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	api "github.com/influenzanet/study-service/pkg/api"
 	grpc "google.golang.org/grpc"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -57,7 +58,7 @@ func (mr *MockStudyServiceApiClientMockRecorder) CreateNewStudy(arg0, arg1 inter
 }
 
 // DeleteParticipantData mocks base method
-func (m *MockStudyServiceApiClient) DeleteParticipantData(arg0 context.Context, arg1 *api.TokenInfos, arg2 ...grpc.CallOption) (*api.ServiceStatus, error) {
+func (m *MockStudyServiceApiClient) DeleteParticipantData(arg0 context.Context, arg1 *api_types.TokenInfos, arg2 ...grpc.CallOption) (*api.ServiceStatus, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -117,7 +118,7 @@ func (mr *MockStudyServiceApiClientMockRecorder) EnterStudy(arg0, arg1 interface
 }
 
 // GetActiveStudies mocks base method
-func (m *MockStudyServiceApiClient) GetActiveStudies(arg0 context.Context, arg1 *api.TokenInfos, arg2 ...grpc.CallOption) (*api.Studies, error) {
+func (m *MockStudyServiceApiClient) GetActiveStudies(arg0 context.Context, arg1 *api_types.TokenInfos, arg2 ...grpc.CallOption) (*api.Studies, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -137,7 +138,7 @@ func (mr *MockStudyServiceApiClientMockRecorder) GetActiveStudies(arg0, arg1 int
 }
 
 // GetAllStudies mocks base method
-func (m *MockStudyServiceApiClient) GetAllStudies(arg0 context.Context, arg1 *api.TokenInfos, arg2 ...grpc.CallOption) (*api.Studies, error) {
+func (m *MockStudyServiceApiClient) GetAllStudies(arg0 context.Context, arg1 *api_types.TokenInfos, arg2 ...grpc.CallOption) (*api.Studies, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
@@ -177,7 +178,7 @@ func (mr *MockStudyServiceApiClientMockRecorder) GetAssignedSurvey(arg0, arg1 in
 }
 
 // GetAssignedSurveys mocks base method
-func (m *MockStudyServiceApiClient) GetAssignedSurveys(arg0 context.Context, arg1 *api.TokenInfos, arg2 ...grpc.CallOption) (*api.AssignedSurveys, error) {
+func (m *MockStudyServiceApiClient) GetAssignedSurveys(arg0 context.Context, arg1 *api_types.TokenInfos, arg2 ...grpc.CallOption) (*api.AssignedSurveys, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
