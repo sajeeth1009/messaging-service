@@ -17,12 +17,15 @@ import (
 	umAPI "github.com/influenzanet/user-management-service/pkg/api"
 )
 
+const loginTokenLifeTime = 7 * 24 * 60 * 60 // 7 days
+
 func AsyncSendToAllUsers(
 	apiClients *types.APIClients,
 	messageDBService *messagedb.MessageDBService,
 	instanceID string,
 	messageTemplate types.EmailTemplate,
 ) {
+	currentWeekday := time.Now().Weekday()
 	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(), &umAPI.StreamUsersMsg{InstanceId: instanceID})
 	if err != nil {
 		log.Printf("AsyncSendToAllUsers: %v", err)
@@ -53,11 +56,10 @@ func AsyncSendToAllUsers(
 			continue
 		}
 		if messageTemplate.MessageType == "newsletter" {
-			if !user.ContactPreferences.SubscribedToNewsletter {
+			if !user.ContactPreferences.SubscribedToNewsletter || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
 				// user does not want to get newsletter
 				continue
 			}
-
 			outgoingEmail.To = getEmailsByIds(user.ContactInfos, user.ContactPreferences.SendNewsletterTo)
 
 			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
@@ -66,8 +68,12 @@ func AsyncSendToAllUsers(
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
-		} else if messageTemplate.MessageType == "study-reminder" {
-			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, 604800)
+		} else if messageTemplate.MessageType == "weekly" {
+			if !user.ContactPreferences.SubscribedToWeekly || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
+				// user does not want to get weekly reminder
+				continue
+			}
+			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, loginTokenLifeTime)
 			if err != nil {
 				log.Printf("AsyncSendToAllUsers: %v", err)
 				continue
@@ -105,6 +111,7 @@ func AsyncSendToStudyParticipants(
 		log.Printf("AsyncSendToStudyParticipants: %v", err)
 		return
 	}
+	currentWeekday := time.Now().Weekday()
 	for {
 		user, err := stream.Recv()
 		if err == io.EOF {
@@ -165,7 +172,11 @@ func AsyncSendToStudyParticipants(
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
-		} else if messageTemplate.MessageType == "study-reminder" {
+		} else if messageTemplate.MessageType == "weekly" {
+			if !user.ContactPreferences.SubscribedToWeekly || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
+				// user does not want to get weekly reminder
+				continue
+			}
 			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, 604800)
 			if err != nil {
 				log.Printf("AsyncSendToAllUsers: %v", err)
