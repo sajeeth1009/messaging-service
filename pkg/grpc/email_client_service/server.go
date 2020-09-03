@@ -18,21 +18,26 @@ const (
 )
 
 type emailClientServer struct {
-	StmpClients *sc.SmtpClients
+	HighPrioStmpClients *sc.SmtpClients
+	StmpClients         *sc.SmtpClients
 }
 
 // NewEmailClientServiceServer creates a new service instance
 func NewEmailClientServiceServer(
+	hpsClients *sc.SmtpClients,
 	sClients *sc.SmtpClients,
 ) api.EmailClientServiceApiServer {
 	return &emailClientServer{
-		StmpClients: sClients,
+		HighPrioStmpClients: hpsClients,
+		StmpClients:         sClients,
 	}
 }
 
 // RunServer runs gRPC service to publish ToDo service
 func RunServer(
-	ctx context.Context, port string, sClients *sc.SmtpClients,
+	ctx context.Context, port string,
+	highPrioClients *sc.SmtpClients,
+	sClients *sc.SmtpClients,
 ) error {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -41,7 +46,9 @@ func RunServer(
 
 	// register service
 	server := grpc.NewServer()
-	api.RegisterEmailClientServiceApiServer(server, NewEmailClientServiceServer(sClients))
+	api.RegisterEmailClientServiceApiServer(server, NewEmailClientServiceServer(
+		highPrioClients, sClients,
+	))
 
 	// graceful shutdown
 	c := make(chan os.Signal, 1)

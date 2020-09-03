@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/influenzanet/go-utils/pkg/testutils"
 	api "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 )
 
@@ -14,7 +15,7 @@ func TestSendEmailEndpoint(t *testing.T) {
 
 	t.Run("with missing payload", func(t *testing.T) {
 		_, err := s.SendEmail(context.Background(), nil)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		ok, msg := testutils.ShouldHaveGrpcErrorStatus(err, "missing argument")
 		if !ok {
 			t.Error(msg)
 		}
@@ -22,7 +23,7 @@ func TestSendEmailEndpoint(t *testing.T) {
 
 	t.Run("with empty payload", func(t *testing.T) {
 		_, err := s.SendEmail(context.Background(), &api.SendEmailReq{})
-		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		ok, msg := testutils.ShouldHaveGrpcErrorStatus(err, "missing argument")
 		if !ok {
 			t.Error(msg)
 		}
@@ -36,7 +37,7 @@ func TestSendEmailEndpoint(t *testing.T) {
 				From: `"Test" <test@test.de>`,
 			},
 		})
-		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		ok, msg := testutils.ShouldHaveGrpcErrorStatus(err, "missing argument")
 		if !ok {
 			t.Error(msg)
 		}

@@ -28,12 +28,23 @@ func (s *emailClientServer) SendEmail(ctx context.Context, req *api.SendEmailReq
 
 	retryCounter := 0
 	for {
-		if err := s.StmpClients.SendMail(
-			req.To,
-			req.Subject,
-			req.Content,
-			types.HeaderOverridesFromEmailClientAPI(req.HeaderOverrides),
-		); err != nil {
+		var err error
+		if req.HighPrio {
+			err = s.HighPrioStmpClients.SendMail(
+				req.To,
+				req.Subject,
+				req.Content,
+				types.HeaderOverridesFromEmailClientAPI(req.HeaderOverrides),
+			)
+		} else {
+			err = s.StmpClients.SendMail(
+				req.To,
+				req.Subject,
+				req.Content,
+				types.HeaderOverridesFromEmailClientAPI(req.HeaderOverrides),
+			)
+		}
+		if err != nil {
 			retryCounter += 1
 			if retryCounter >= maxRetry {
 				return nil, status.Error(codes.Internal, err.Error())
