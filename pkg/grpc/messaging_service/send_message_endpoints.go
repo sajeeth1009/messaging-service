@@ -112,6 +112,7 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
 		HeaderOverrides: outgoingEmail.HeaderOverrides.ToEmailClientAPI(),
 		Subject:         outgoingEmail.Subject,
 		Content:         content,
+		HighPrio:        true,
 	})
 	if err != nil {
 		_, errS := s.messageDBservice.AddToOutgoingEmails(req.InstanceId, outgoingEmail)
