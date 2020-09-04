@@ -12,6 +12,8 @@ The email-client-service expects two configuration files at the MESSAGING_CONFIG
 - `high-prio-smtp-servers.yaml` -> server list that will be used to send instant messages (e.g. login verification code)
 - `smtp-servers.yaml` -> server list that will be used to send bulk messages (e.g., weekly study emails)
 
+The two files follow the same structure and allow the same configuration options. (See example in /test/configs)
+
 ## Test
 Before running the test first you have to generate the client mock services:
 ```
