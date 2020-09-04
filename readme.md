@@ -7,6 +7,11 @@ It consist three services:
 - message schedular is a job for sending out automatic emails and manage outgoing
 - email-client-service: a wrapper for SMTP client
 
+## Email client config files
+The email-client-service expects two configuration files at the MESSAGING_CONFIG_FOLDER path:
+- `high-prio-smtp-servers.yaml` -> server list that will be used to send instant messages (e.g. login verification code)
+- `smtp-servers.yaml` -> server list that will be used to send bulk messages (e.g., weekly study emails)
+
 ## Test
 Before running the test first you have to generate the client mock services:
 ```
