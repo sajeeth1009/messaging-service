@@ -4,6 +4,7 @@ This page contains some useful information around the email template topic, e.g.
 ## Message Types
 Required message types for system messages:
 - **registration**: when a new account is created, this message will be sent to the used email address. This message should include link to email verification route including the token (see below).
+- **invitation**: this email is sent out when a user account was created by an admin. This message should include link to invite link route including the token (see below).
 - **verify-email**: if a user requests a new verification email, or in case the email address is changed in the application, this email will be sent out. Should also contain the specific link for email verification.
 - **password-reset**: after triggering the password reset workflow, this email-template will be used. Should contain link with url toward the password reset link resolver of the web-client, including the appropriate token (see below).
 - **verification-code**: After login, the user will receive this message, that should include the 6 digit numeric code prominently.
@@ -50,6 +51,8 @@ Possible *subroutes* are:
 - `/link/study-login?token=<loginToken>&study=<studykey>` - use this link to open the study page directly.
 - `/link/verify-contact?token=<token>`: - use this link to confirm email address, e.g., after registration or when the email address has been changed.
 - `/link/password-reset?token=<token>`: at this link with the appropriate token, the password reset workflow is triggered (you verified possession of the email address).
+- `/link/invitation?token=<token>`: this link is to confirm the invitation - verifying email address and starting password reset workflow.
+
 
 <- For the notion `<variable>`, see the section before how to access variables.
 Finally, an example url route with variables could look like this:
