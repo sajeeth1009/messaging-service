@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/influenzanet/go-utils/pkg/api_types"
+	"github.com/influenzanet/go-utils/pkg/constants"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/dbs/messagedb"
@@ -55,7 +56,7 @@ func AsyncSendToAllUsers(
 			log.Println("message is not sent, if account not confirmed")
 			continue
 		}
-		if messageTemplate.MessageType == "newsletter" {
+		if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER {
 			if !user.ContactPreferences.SubscribedToNewsletter || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
 				// user does not want to get newsletter
 				continue
@@ -68,7 +69,7 @@ func AsyncSendToAllUsers(
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
-		} else if messageTemplate.MessageType == "weekly" {
+		} else if messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
 			if !user.ContactPreferences.SubscribedToWeekly || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
 				// user does not want to get weekly reminder
 				continue
@@ -158,7 +159,7 @@ func AsyncSendToStudyParticipants(
 			continue
 		}
 
-		if messageTemplate.MessageType == "newsletter" {
+		if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER {
 			if !user.ContactPreferences.SubscribedToNewsletter {
 				// user does not want to get newsletter
 				continue
@@ -172,7 +173,7 @@ func AsyncSendToStudyParticipants(
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
-		} else if messageTemplate.MessageType == "weekly" {
+		} else if messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
 			if !user.ContactPreferences.SubscribedToWeekly || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
 				// user does not want to get weekly reminder
 				continue
@@ -310,7 +311,7 @@ func getTemploginToken(
 ) (token string, err error) {
 	resp, err := userClient.GenerateTempToken(context.Background(), &api_types.TempTokenInfo{
 		UserId:     user.Id,
-		Purpose:    "survey-login",
+		Purpose:    constants.TOKEN_PURPOSE_SURVEY_LOGIN,
 		InstanceId: instanceID,
 		Expiration: time.Now().Unix() + expiresIn,
 		Info: map[string]string{
@@ -330,7 +331,7 @@ func getUnsubscribeToken(
 ) (token string, err error) {
 	resp, err := userClient.GetOrCreateTemptoken(context.Background(), &api_types.TempTokenInfo{
 		UserId:     user.Id,
-		Purpose:    "unsubscribe-newsletter",
+		Purpose:    constants.TOKEN_PURPOSE_UNSUBSCRIBE_NEWLETTER,
 		InstanceId: instanceID,
 		Expiration: time.Now().Unix() + 157680000,
 	})
