@@ -28,6 +28,7 @@ mock:
 	mockgen -source=./pkg/api/email_client_service/email-client-service.pb.go EmailClientServiceApiClient > test/mocks/email-client-service/email_client_service.go
 	mockgen github.com/influenzanet/user-management-service/pkg/api UserManagementApiClient,UserManagementApi_StreamUsersClient > test/mocks/user-management-service/user_management_service.go
 	mockgen github.com/influenzanet/study-service/pkg/api StudyServiceApiClient > test/mocks/study-service/study_service.go
+	mockgen github.com/influenzanet/logging-service/pkg/api LoggingServiceApiClient > test/mocks/logging_service/logging_service.go
 
 test:
 	./test/test.sh $(TEST_ARGS)

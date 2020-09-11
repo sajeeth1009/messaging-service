@@ -3,6 +3,7 @@ package clients
 import (
 	"log"
 
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	studyAPI "github.com/influenzanet/study-service/pkg/api"
 	umAPI "github.com/influenzanet/user-management-service/pkg/api"
@@ -30,4 +31,10 @@ func ConnectToEmailClientService(addr string) (client emailAPI.EmailClientServic
 func ConnectToStudyService(addr string) (client studyAPI.StudyServiceApiClient, close func() error) {
 	serverConn := connectToGRPCServer(addr)
 	return studyAPI.NewStudyServiceApiClient(serverConn), serverConn.Close
+}
+
+func ConnectToLoggingService(addr string) (client loggingAPI.LoggingServiceApiClient, close func() error) {
+	// Connect to user management service
+	serverConn := connectToGRPCServer(addr)
+	return loggingAPI.NewLoggingServiceApiClient(serverConn), serverConn.Close
 }
