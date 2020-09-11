@@ -331,7 +331,7 @@ func getUnsubscribeToken(
 ) (token string, err error) {
 	resp, err := userClient.GetOrCreateTemptoken(context.Background(), &api_types.TempTokenInfo{
 		UserId:     user.Id,
-		Purpose:    constants.TOKEN_PURPOSE_UNSUBSCRIBE_NEWLETTER,
+		Purpose:    constants.TOKEN_PURPOSE_UNSUBSCRIBE_NEWSLETTER,
 		InstanceId: instanceID,
 		Expiration: time.Now().Unix() + 157680000,
 	})
