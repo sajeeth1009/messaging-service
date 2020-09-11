@@ -18,7 +18,11 @@ import (
 
 // Config is the structure that holds all global configuration data
 type Config struct {
-	SleepInterval   int
+	Frequencies struct {
+		HighPrio    int
+		LowPrio     int
+		AutoMessage int
+	}
 	MessageDBConfig types.DBConfig
 	GlobalDBConfig  types.DBConfig
 	ServiceURLs     struct {
@@ -30,11 +34,28 @@ type Config struct {
 
 func initConfig() Config {
 	conf := Config{}
-	mps, err := strconv.Atoi(os.Getenv("MESSAGE_SCHEDULER_SLEEP_INTERVAL"))
+	hp, err := strconv.Atoi(os.Getenv("MESSAGE_SCHEDULER_INTERVAL_HIGH_PRIO"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	conf.SleepInterval = mps
+	lp, err := strconv.Atoi(os.Getenv("MESSAGE_SCHEDULER_INTERVAL_LOW_PRIO"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	am, err := strconv.Atoi(os.Getenv("MESSAGE_SCHEDULER_INTERVAL_AUTO_MESSAGE"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	conf.Frequencies = struct {
+		HighPrio    int
+		LowPrio     int
+		AutoMessage int
+	}{
+		HighPrio:    hp,
+		LowPrio:     lp,
+		AutoMessage: am,
+	}
 	conf.ServiceURLs.UserManagementService = os.Getenv("ADDR_USER_MANAGEMENT_SERVICE")
 	conf.ServiceURLs.StudyService = os.Getenv("ADDR_STUDY_SERVICE")
 	conf.ServiceURLs.EmailClientService = os.Getenv("ADDR_EMAIL_CLIENT_SERVICE")
@@ -64,21 +85,41 @@ func main() {
 	messageDBService := messagedb.NewMessageDBService(conf.MessageDBConfig)
 	globalDBService := globaldb.NewGlobalDBService(conf.GlobalDBConfig)
 
+	go runnerForLowPrioOutgoingEmails(messageDBService, globalDBService, clients, conf.Frequencies.LowPrio)
+	go runnerForAutoMessages(messageDBService, globalDBService, clients, conf.Frequencies.AutoMessage)
+	runnerForHighPrioOutgoingEmails(messageDBService, globalDBService, clients, conf.Frequencies.HighPrio)
+}
+
+func runnerForHighPrioOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
 	for {
-		go handleOutgoingEmails(messageDBService, globalDBService, clients)
-		go handleAutoMessages(messageDBService, globalDBService, clients)
-		time.Sleep(time.Duration(conf.SleepInterval) * time.Minute)
+		log.Println("Fetch and send high prio outgoing emails.")
+		go handleOutgoingEmails(mdb, gdb, clients, true)
+		time.Sleep(time.Duration(freq) * time.Second)
 	}
 }
 
-func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients) {
+func runnerForLowPrioOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
+	for {
+		log.Println("Fetch and send low prio outgoing emails.")
+		go handleOutgoingEmails(mdb, gdb, clients, false)
+		time.Sleep(time.Duration(freq) * time.Second)
+	}
+}
 
+func runnerForAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
+	for {
+		go handleAutoMessages(mdb, gdb, clients)
+		time.Sleep(time.Duration(freq) * time.Second)
+	}
+}
+
+func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, onlyHighPrio bool) {
 	instances, err := gdb.GetAllInstances()
 	if err != nil {
 		log.Printf("handleOutgoingEmails.GetAllInstances: %v", err)
 	}
 	for _, instance := range instances {
-		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500, false)
+		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500, onlyHighPrio)
 		if err != nil {
 			log.Printf("handleOutgoingEmails.FetchOutgoingEmails for %s: %v", instance.InstanceID, err)
 			continue
@@ -93,6 +134,7 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 				HeaderOverrides: email.HeaderOverrides.ToEmailClientAPI(),
 				Subject:         email.Subject,
 				Content:         email.Content,
+				HighPrio:        email.HighPrio,
 			})
 			if err != nil {
 				log.Printf("Could not send email in instance %s, save to outgoing.", instance.InstanceID)
