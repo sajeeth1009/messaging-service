@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/influenzanet/go-utils/pkg/constants"
 	"github.com/influenzanet/go-utils/pkg/token_checks"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
@@ -30,7 +31,7 @@ func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.Se
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{constants.USER_ROLE_ADMIN}) {
 		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
 	}
 
@@ -52,7 +53,7 @@ func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, re
 	if req == nil || token_checks.IsTokenEmpty(req.Token) || req.StudyKey == "" || req.Template == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{"RESEARCHER", "ADMIN"}) {
+	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{constants.USER_ROLE_RESEARCHER, constants.USER_ROLE_ADMIN}) {
 		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
 	}
 	req.Template.StudyKey = req.StudyKey
@@ -105,6 +106,7 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
 		HeaderOverrides: templateDef.HeaderOverrides,
 		Subject:         translation.Subject,
 		Content:         content,
+		HighPrio:        !req.UseLowPrio,
 	}
 
 	_, err = s.clients.EmailClientService.SendEmail(ctx, &emailAPI.SendEmailReq{

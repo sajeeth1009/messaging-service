@@ -78,7 +78,7 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 		log.Printf("handleOutgoingEmails.GetAllInstances: %v", err)
 	}
 	for _, instance := range instances {
-		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500)
+		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500, false)
 		if err != nil {
 			log.Printf("handleOutgoingEmails.FetchOutgoingEmails for %s: %v", instance.InstanceID, err)
 			continue

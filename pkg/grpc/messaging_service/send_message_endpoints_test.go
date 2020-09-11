@@ -191,7 +191,7 @@ func TestSendInstantEmailEndpoint(t *testing.T) {
 			return
 		}
 
-		mails, err := s.messageDBservice.FetchOutgoingEmails(testInstanceID, 1)
+		mails, err := s.messageDBservice.FetchOutgoingEmails(testInstanceID, 1, false)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -218,7 +218,7 @@ func TestSendInstantEmailEndpoint(t *testing.T) {
 			return
 		}
 
-		mails, err := s.messageDBservice.FetchOutgoingEmails(testInstanceID, 1)
+		mails, err := s.messageDBservice.FetchOutgoingEmails(testInstanceID, 1, false)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return

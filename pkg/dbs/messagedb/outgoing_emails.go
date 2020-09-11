@@ -38,7 +38,7 @@ func (dbService *MessageDBService) AddToSentEmails(instanceID string, email type
 	return email, nil
 }
 
-func (dbService *MessageDBService) FetchOutgoingEmails(instanceID string, amount int) (emails []types.OutgoingEmail, err error) {
+func (dbService *MessageDBService) FetchOutgoingEmails(instanceID string, amount int, onlyHighPrio bool) (emails []types.OutgoingEmail, err error) {
 	ctx, cancel := dbService.getContext()
 	defer cancel()
 
@@ -46,6 +46,9 @@ func (dbService *MessageDBService) FetchOutgoingEmails(instanceID string, amount
 	for counter < amount {
 		var newEmail types.OutgoingEmail
 		filter := bson.M{}
+		if onlyHighPrio {
+			filter["highPrio"] = true
+		}
 		if err := dbService.collectionRefOutgoingEmails(instanceID).FindOneAndDelete(ctx, filter).Decode(&newEmail); err != nil {
 			break
 		}
