@@ -3,6 +3,7 @@ package email_client_service
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	api "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
@@ -11,7 +12,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const maxRetry = 3
+const (
+	maxRetry = 5
+)
 
 func (s *emailClientServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
 	return &api.ServiceStatus{
@@ -45,11 +48,12 @@ func (s *emailClientServer) SendEmail(ctx context.Context, req *api.SendEmailReq
 			)
 		}
 		if err != nil {
-			retryCounter += 1
 			if retryCounter >= maxRetry {
 				return nil, status.Error(codes.Internal, err.Error())
 			}
-			log.Printf("SendEmail: %v", err)
+			retryCounter += 1
+			log.Printf("SendEmail attempt #%d %v", retryCounter, err)
+			time.Sleep(time.Duration(retryCounter) * time.Second)
 		} else {
 			break
 		}
