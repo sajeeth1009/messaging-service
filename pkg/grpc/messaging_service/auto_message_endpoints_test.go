@@ -5,14 +5,23 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/go-utils/pkg/api_types"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
+	loggingMock "github.com/influenzanet/messaging-service/test/mocks/logging_service"
 )
 
 func TestGetAutoMessagesEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
+		clients: &types.APIClients{
+			LoggingService: mockLoggingClient,
+		},
 	}
 
 	_, err := s.messageDBservice.SaveAutoMessage(testInstanceID, types.AutoMessage{Type: "B"})
@@ -43,6 +52,10 @@ func TestGetAutoMessagesEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid arguments", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		resp, err := s.GetAutoMessages(context.Background(), &api.GetAutoMessagesReq{
 			Token: &api_types.TokenInfos{
 				Id:         "uid",
@@ -66,8 +79,15 @@ func TestGetAutoMessagesEndpoint(t *testing.T) {
 }
 
 func TestSaveAutoMessageEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
+		clients: &types.APIClients{
+			LoggingService: mockLoggingClient,
+		},
 	}
 
 	userToken := &api_types.TokenInfos{
@@ -97,6 +117,10 @@ func TestSaveAutoMessageEndpoint(t *testing.T) {
 
 	id := ""
 	t.Run("with new message", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		resp, err := s.SaveAutoMessage(context.Background(), &api.SaveAutoMessageReq{
 			Token: userToken,
 			AutoMessage: &api.AutoMessage{
@@ -111,6 +135,10 @@ func TestSaveAutoMessageEndpoint(t *testing.T) {
 	})
 
 	t.Run("with existing message", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		_, err := s.SaveAutoMessage(context.Background(), &api.SaveAutoMessageReq{
 			Token: userToken,
 			AutoMessage: &api.AutoMessage{
@@ -126,8 +154,15 @@ func TestSaveAutoMessageEndpoint(t *testing.T) {
 }
 
 func TestDeleteAutoMessageEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
+		clients: &types.APIClients{
+			LoggingService: mockLoggingClient,
+		},
 	}
 	userToken := &api_types.TokenInfos{
 		Id:         "uid",
@@ -161,7 +196,13 @@ func TestDeleteAutoMessageEndpoint(t *testing.T) {
 	})
 
 	t.Run("with not existing message", func(t *testing.T) {
-		_, err := s.DeleteAutoMessage(context.Background(), &api.DeleteAutoMessageReq{AutoMessageId: "wrong"})
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+		_, err := s.DeleteAutoMessage(context.Background(), &api.DeleteAutoMessageReq{
+			Token:         userToken,
+			AutoMessageId: "wrong"})
 		ok, msg := shouldHaveGrpcErrorStatus(err, "")
 		if !ok {
 			t.Error(msg)
@@ -169,6 +210,10 @@ func TestDeleteAutoMessageEndpoint(t *testing.T) {
 	})
 
 	t.Run("with existing message", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		_, err := s.DeleteAutoMessage(context.Background(), &api.DeleteAutoMessageReq{
 			Token:         userToken,
 			AutoMessageId: testAutoMessage.ID.Hex(),

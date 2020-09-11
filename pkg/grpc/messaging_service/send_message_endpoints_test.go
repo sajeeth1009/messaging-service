@@ -9,6 +9,7 @@ import (
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/types"
 	emailMock "github.com/influenzanet/messaging-service/test/mocks/email-client-service"
+	loggingMock "github.com/influenzanet/messaging-service/test/mocks/logging_service"
 	studyMock "github.com/influenzanet/messaging-service/test/mocks/study-service"
 	userMock "github.com/influenzanet/messaging-service/test/mocks/user-management-service"
 	"google.golang.org/grpc/codes"
@@ -20,12 +21,14 @@ func TestSendMessageToAllUsersEndpoint(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockEmailClient := emailMock.NewMockEmailClientServiceApiClient(mockCtrl)
 	mockUserClient := userMock.NewMockUserManagementApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
 		clients: &types.APIClients{
 			EmailClientService:    mockEmailClient,
 			UserManagementService: mockUserClient,
+			LoggingService:        mockLoggingClient,
 		},
 	}
 
@@ -46,6 +49,10 @@ func TestSendMessageToAllUsersEndpoint(t *testing.T) {
 	})
 
 	t.Run("with non admin user", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		_, err := s.SendMessageToAllUsers(context.Background(), &api.SendMessageToAllUsersReq{
 			Token: &api_types.TokenInfos{
 				Id:         "uid",
@@ -77,6 +84,7 @@ func TestSendMessageToStudyParticipantsEndpoint(t *testing.T) {
 	defer mockCtrl2.Finish()
 	mockUserClient := userMock.NewMockUserManagementApiClient(mockCtrl2)
 	mockStudyClient := studyMock.NewMockStudyServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := messagingServer{
 		messageDBservice: testMessageDBService,
@@ -84,6 +92,7 @@ func TestSendMessageToStudyParticipantsEndpoint(t *testing.T) {
 			EmailClientService:    mockEmailClient,
 			UserManagementService: mockUserClient,
 			StudyService:          mockStudyClient,
+			LoggingService:        mockLoggingClient,
 		},
 	}
 
@@ -104,6 +113,10 @@ func TestSendMessageToStudyParticipantsEndpoint(t *testing.T) {
 	})
 
 	t.Run("with non admin user", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		_, err := s.SendMessageToStudyParticipants(context.Background(), &api.SendMessageToStudyParticipantsReq{
 			Token: &api_types.TokenInfos{
 				Id:         "uid",

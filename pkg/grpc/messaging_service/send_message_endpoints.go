@@ -3,11 +3,13 @@ package messaging_service
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/influenzanet/go-utils/pkg/constants"
 	"github.com/influenzanet/go-utils/pkg/token_checks"
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/bulk_messages"
@@ -32,6 +34,7 @@ func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.Se
 	}
 
 	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{constants.USER_ROLE_ADMIN}) {
+		s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_BULK_MESSAGE_SEND, fmt.Sprintf("permission denied for send %s to all users", req.Template.MessageType))
 		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
 	}
 
@@ -54,6 +57,7 @@ func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, re
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 	if !token_checks.CheckIfAnyRolesInToken(req.Token, []string{constants.USER_ROLE_RESEARCHER, constants.USER_ROLE_ADMIN}) {
+		s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_BULK_MESSAGE_SEND, fmt.Sprintf("permission denied for send %s to study %s", req.Template.MessageType, req.StudyKey))
 		return nil, status.Error(codes.PermissionDenied, "no permission to send messages")
 	}
 	req.Template.StudyKey = req.StudyKey

@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.4.2
-	github.com/influenzanet/go-utils v0.2.2
+	github.com/influenzanet/go-utils v0.2.4
 	github.com/influenzanet/logging-service v0.1.0
 	github.com/influenzanet/study-service v0.12.0
 	github.com/influenzanet/user-management-service v0.16.1
