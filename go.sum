@@ -106,6 +106,8 @@ github.com/influenzanet/go-utils v0.2.3 h1:YhuTkHcQBa015yyqi733LwyX46woU0te+MU36
 github.com/influenzanet/go-utils v0.2.3/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
 github.com/influenzanet/go-utils v0.2.4 h1:HrAeOFeCgwTaE5uqP9bkazU9tDEMbqfXQSMpWQ6DA7o=
 github.com/influenzanet/go-utils v0.2.4/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
+github.com/influenzanet/go-utils v0.2.5 h1:nzuQ9qkDNRLYxDLKufQNXagiGiwJGNQO2mgDcMJuFjw=
+github.com/influenzanet/go-utils v0.2.5/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
 github.com/influenzanet/logging-service v0.1.0 h1:9LBiyGvIVhoF8JRZge45xEj8XmSUozfpY4PgiOmArI0=
 github.com/influenzanet/logging-service v0.1.0/go.mod h1:IJ4fo8B8zMhzG3HnFDLCQWDYQmO3rejqYVcN0c/h8eU=
 github.com/influenzanet/messaging-service v0.2.0/go.mod h1:11yQIQT4x91kVVGQw4/H4YgHxaKdhDBGz84f8kZvC1g=
@@ -113,6 +115,7 @@ github.com/influenzanet/messaging-service v0.5.3/go.mod h1:Ev3V4sjuqYEBdj1N5fQfA
 github.com/influenzanet/messaging-service v0.6.0/go.mod h1:g161zqRK7aCg/o56Ij6HMUG2Rp7ibnDpLm2ExlrSXfE=
 github.com/influenzanet/messaging-service v0.6.1/go.mod h1:D8TALbql5vPWRwOiK6Vh5KodUP4dHAtr4F6GdPsRlj8=
 github.com/influenzanet/messaging-service v0.7.1/go.mod h1:mnd4+t7q/EaWGRGOliu5YVYRk4pZeC+q9Y2hWiLcrwE=
+github.com/influenzanet/messaging-service v0.8.0/go.mod h1:JnbHpEDNp/YI+GGnIr/7n9hGCP87aBY1M+8h40dzg7k=
 github.com/influenzanet/study-service v0.6.2 h1:kBsCnfuC8WDpWkZmpsaqxg++aFVkReFK4DT+uf/DCsM=
 github.com/influenzanet/study-service v0.6.2/go.mod h1:S/inqN3mSNT0cQ3xgi8upUEXWzBIxn6CirfXzhuLZsw=
 github.com/influenzanet/study-service v0.8.0 h1:0sVwjitGfKZL5lR+cyaJJveeYwQIQc8gOUHaywSY/Us=
@@ -123,6 +126,8 @@ github.com/influenzanet/study-service v0.11.0 h1:2lU20DxWrFS5G1ZMYI1gPPLfsY4beMz
 github.com/influenzanet/study-service v0.11.0/go.mod h1:/eeTlMOv7AcKfPFQLVgX5eu+dWU4QbgS6Hud6P+HDRs=
 github.com/influenzanet/study-service v0.12.0 h1:p48a3+A5AZlT0ab+amrt81cRY0+hBc45VSJayL6Hn1M=
 github.com/influenzanet/study-service v0.12.0/go.mod h1:fYwv5ZaD4sdz63nwLIY3kAfwqSHC02ndF5IoBEKm25Q=
+github.com/influenzanet/study-service v0.13.1 h1:zY5ehN2U9KY9AK7nHh0jU9UernV39QalhciWzZilqfE=
+github.com/influenzanet/study-service v0.13.1/go.mod h1:XB9KbWI4wgpYnBgIcy7W/zYaob+P4SX0/VqcRQEozJQ=
 github.com/influenzanet/user-management-service v0.4.0-alpha h1:rZjpe41kdW/1jElh6rWXhAqByezW7QtX+XYBTShXlLM=
 github.com/influenzanet/user-management-service v0.4.0-alpha/go.mod h1:hzpAlj0vcpZByruRB5IQmjiuiYuAAy2E7tkr9sc1B64=
 github.com/influenzanet/user-management-service v0.7.0 h1:tRQ1Op9IHOGEGdi7DSD2cucppYSxuQrEJWXyeMkd34E=
@@ -135,6 +140,8 @@ github.com/influenzanet/user-management-service v0.14.2 h1:1s0aOdgzqXbKqzxunvTYP
 github.com/influenzanet/user-management-service v0.14.2/go.mod h1:o2y5z0vb8RmutQTUv7UO8yBu2pQctdxtcUwegVztkZA=
 github.com/influenzanet/user-management-service v0.16.1 h1:Bwn8e/vej9JAYmtld3hH0Gsr9EcIGYL0YwtNGG3/9Q4=
 github.com/influenzanet/user-management-service v0.16.1/go.mod h1:EdF7PcJJSNAAGBfsTA87zdq5mDfw/OQpm+/wsPiAdsA=
+github.com/influenzanet/user-management-service v0.17.5 h1:tpWFi4enat6phQkXkc5H2ElNI/aTt9OMOT9uGmQWmeg=
+github.com/influenzanet/user-management-service v0.17.5/go.mod h1:WIn9RuBmeF86P3sj7XSCEY0+v8hJi4uPDySnzo4c8mk=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
@@ -145,6 +152,8 @@ github.com/jordan-wright/email v0.0.0-20200602115436-fd8a7622303e h1:OGunVjqY7y4
 github.com/jordan-wright/email v0.0.0-20200602115436-fd8a7622303e/go.mod h1:Fy2gCFfZhay8jplf/Csj6cyH/oshQTkLQYZbKkcV+SY=
 github.com/jordan-wright/email v4.0.1-0.20200824153738-3f5bafa1cd84+incompatible h1:d60x4RsAHk/UX/0OT8Gc6D7scVvhBbEANpTAWrDhA/I=
 github.com/jordan-wright/email v4.0.1-0.20200824153738-3f5bafa1cd84+incompatible/go.mod h1:1c7szIrayyPPB/987hsnvNzLushdWf4o/79s3P08L8A=
+github.com/jordan-wright/email v4.0.1-0.20200917010138-e1c00e156980+incompatible h1:CL0ooBNfbNyJTJATno+m0h+zM5bW6v7fKlboKUGP/dI=
+github.com/jordan-wright/email v4.0.1-0.20200917010138-e1c00e156980+incompatible/go.mod h1:1c7szIrayyPPB/987hsnvNzLushdWf4o/79s3P08L8A=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=
 github.com/karrick/godirwalk v1.10.3 h1:lOpSw2vJP0y5eLBW906QwKsUK/fe/QDyoqM5rnnuPDY=
 github.com/karrick/godirwalk v1.10.3/go.mod h1:RoGL9dQei4vP9ilrpETWE8CLOZ1kiN0LhBygSwrAsHA=
@@ -312,6 +321,8 @@ google.golang.org/genproto v0.0.0-20200605102947-12044bf5ea91 h1:ES+5k7Xz+sYByd2
 google.golang.org/genproto v0.0.0-20200605102947-12044bf5ea91/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
 google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d h1:92D1fum1bJLKSdr11OJ+54YeCMCGYIygTA7R/YZxH5M=
 google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
+google.golang.org/genproto v0.0.0-20200911024640-645f7a48b24f h1:Yv4xsIx7HZOoyUGSJ2ksDyWE2qIBXROsZKt2ny3hCGM=
+google.golang.org/genproto v0.0.0-20200911024640-645f7a48b24f/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=

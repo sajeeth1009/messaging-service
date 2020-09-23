@@ -23,6 +23,7 @@ type SmtpServer struct {
 		Username string `yaml:"user"`
 		Password string `yaml:"password"`
 	} `yaml:"auth"`
+	SendTimeout int `yaml:"sendTimeout"`
 }
 
 // Address URI to smtp server

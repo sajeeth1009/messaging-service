@@ -51,5 +51,5 @@ func (sc *SmtpClients) SendMail(
 		HTML:    []byte(htmlContent),
 		Headers: textproto.MIMEHeader{},
 	}
-	return selectedServer.Send(e, time.Second*15)
+	return selectedServer.Send(e, time.Second*time.Duration(sc.servers.Servers[index].SendTimeout))
 }

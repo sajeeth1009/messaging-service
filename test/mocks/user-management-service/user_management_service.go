@@ -638,26 +638,6 @@ func (mr *MockUserManagementApiClientMockRecorder) StreamUsers(arg0, arg1 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamUsers", reflect.TypeOf((*MockUserManagementApiClient)(nil).StreamUsers), varargs...)
 }
 
-// SwitchProfile mocks base method
-func (m *MockUserManagementApiClient) SwitchProfile(arg0 context.Context, arg1 *api.SwitchProfileRequest, arg2 ...grpc.CallOption) (*api.TokenResponse, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "SwitchProfile", varargs...)
-	ret0, _ := ret[0].(*api.TokenResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SwitchProfile indicates an expected call of SwitchProfile
-func (mr *MockUserManagementApiClientMockRecorder) SwitchProfile(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SwitchProfile", reflect.TypeOf((*MockUserManagementApiClient)(nil).SwitchProfile), varargs...)
-}
-
 // UpdateContactPreferences mocks base method
 func (m *MockUserManagementApiClient) UpdateContactPreferences(arg0 context.Context, arg1 *api.ContactPreferencesMsg, arg2 ...grpc.CallOption) (*api.User, error) {
 	m.ctrl.T.Helper()

@@ -198,14 +198,14 @@ func (mr *MockStudyServiceApiClientMockRecorder) GetAssignedSurveys(arg0, arg1 i
 }
 
 // GetStudiesForUser mocks base method
-func (m *MockStudyServiceApiClient) GetStudiesForUser(arg0 context.Context, arg1 *api.GetStudiesForUserReq, arg2 ...grpc.CallOption) (*api.Studies, error) {
+func (m *MockStudyServiceApiClient) GetStudiesForUser(arg0 context.Context, arg1 *api.GetStudiesForUserReq, arg2 ...grpc.CallOption) (*api.StudiesForUser, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetStudiesForUser", varargs...)
-	ret0, _ := ret[0].(*api.Studies)
+	ret0, _ := ret[0].(*api.StudiesForUser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
