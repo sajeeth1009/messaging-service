@@ -2,6 +2,7 @@ package smtp_client
 
 import (
 	"errors"
+	"log"
 	"net/textproto"
 	"time"
 
@@ -17,7 +18,10 @@ func (sc *SmtpClients) SendMail(
 ) error {
 	sc.counter += 1
 	if len(sc.connectionPool) < 1 {
-		return errors.New("no servers defined")
+		sc.connectionPool = initConnectionPool(sc.servers)
+		if len(sc.connectionPool) < 1 {
+			return errors.New("no servers defined")
+		}
 	}
 
 	index := sc.counter % len(sc.connectionPool)
@@ -51,5 +55,19 @@ func (sc *SmtpClients) SendMail(
 		HTML:    []byte(htmlContent),
 		Headers: textproto.MIMEHeader{},
 	}
-	return selectedServer.Send(e, time.Second*time.Duration(sc.servers.Servers[index].SendTimeout))
+	err := selectedServer.Send(e, time.Second*time.Duration(sc.servers.Servers[index].SendTimeout))
+
+	if err != nil {
+		// close and try to reconnect
+		log.Printf("error when trying to send email: %v", err)
+		selectedServer.Close()
+		pool, errReconnect := connectToPool(sc.servers.Servers[index])
+		if errReconnect != nil {
+			log.Printf("cannot reconnect pool for %v", sc.servers.Servers[index])
+		} else {
+			log.Printf("successfully reconnected to %v", sc.servers.Servers[index])
+			sc.connectionPool[index] = *pool
+		}
+	}
+	return err
 }
