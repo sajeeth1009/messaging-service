@@ -36,7 +36,7 @@ func TestOutgoingEmailsDB(t *testing.T) {
 	})
 
 	t.Run("fetch outgoing emails", func(t *testing.T) {
-		resp, err := testDBService.FetchOutgoingEmails(testInstanceID, 10, true)
+		resp, err := testDBService.FetchOutgoingEmails(testInstanceID, 10, 1, true)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -46,7 +46,7 @@ func TestOutgoingEmailsDB(t *testing.T) {
 			return
 		}
 
-		resp, err = testDBService.FetchOutgoingEmails(testInstanceID, 10, true)
+		resp, err = testDBService.FetchOutgoingEmails(testInstanceID, 10, 1, true)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -56,7 +56,7 @@ func TestOutgoingEmailsDB(t *testing.T) {
 			return
 		}
 
-		resp, err = testDBService.FetchOutgoingEmails(testInstanceID, 10, false)
+		resp, err = testDBService.FetchOutgoingEmails(testInstanceID, 10, 1, false)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -66,7 +66,7 @@ func TestOutgoingEmailsDB(t *testing.T) {
 			return
 		}
 		// again:
-		resp, err = testDBService.FetchOutgoingEmails(testInstanceID, 10, false)
+		resp, err = testDBService.FetchOutgoingEmails(testInstanceID, 10, 1, false)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return

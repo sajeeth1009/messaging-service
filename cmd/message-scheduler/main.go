@@ -91,35 +91,38 @@ func main() {
 }
 
 func runnerForHighPrioOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
+	olderThan := int64(float64(freq) * 0.8)
 	for {
 		log.Println("Fetch and send high prio outgoing emails.")
-		go handleOutgoingEmails(mdb, gdb, clients, true)
+		go handleOutgoingEmails(mdb, gdb, clients, olderThan, true)
 		time.Sleep(time.Duration(freq) * time.Second)
 	}
 }
 
 func runnerForLowPrioOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
+	olderThan := int64(float64(freq) * 0.8)
 	for {
 		log.Println("Fetch and send low prio outgoing emails.")
-		go handleOutgoingEmails(mdb, gdb, clients, false)
+		go handleOutgoingEmails(mdb, gdb, clients, olderThan, false)
 		time.Sleep(time.Duration(freq) * time.Second)
 	}
 }
 
 func runnerForAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
 	for {
+		log.Println("Fetch and send scheduled bulk messages.")
 		go handleAutoMessages(mdb, gdb, clients)
 		time.Sleep(time.Duration(freq) * time.Second)
 	}
 }
 
-func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, onlyHighPrio bool) {
+func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, olderThan int64, onlyHighPrio bool) {
 	instances, err := gdb.GetAllInstances()
 	if err != nil {
 		log.Printf("handleOutgoingEmails.GetAllInstances: %v", err)
 	}
 	for _, instance := range instances {
-		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500, onlyHighPrio)
+		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500, olderThan, onlyHighPrio)
 		if err != nil {
 			log.Printf("handleOutgoingEmails.FetchOutgoingEmails for %s: %v", instance.InstanceID, err)
 			continue
@@ -137,17 +140,18 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 				HighPrio:        email.HighPrio,
 			})
 			if err != nil {
-				log.Printf("Could not send email in instance %s, save to outgoing.", instance.InstanceID)
-				_, errS := mdb.AddToOutgoingEmails(instance.InstanceID, email)
-				if errS != nil {
-					log.Printf("Error while saving to outgoing: %v", errS)
-				}
+				log.Printf("Could not send email in instance %s ", instance.InstanceID)
 				continue
 			}
 
 			_, err = mdb.AddToSentEmails(instance.InstanceID, email)
 			if err != nil {
 				log.Printf("Error while saving to sent: %v", err)
+				continue
+			}
+			err = mdb.DeleteOutgoingEmail(instance.InstanceID, email.ID.Hex())
+			if err != nil {
+				log.Printf("Error while deleting outgoing: %v", err)
 			}
 		}
 	}

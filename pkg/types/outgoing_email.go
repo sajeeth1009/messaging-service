@@ -11,4 +11,5 @@ type OutgoingEmail struct {
 	Content         string             `bson:"content"`
 	AddedAt         int64              `bson:"addedAt"`
 	HighPrio        bool               `bson:"highPrio"`
+	LastSendAttempt int64              `bson:"lastSendAttempt"`
 }

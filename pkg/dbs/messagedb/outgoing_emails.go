@@ -1,6 +1,7 @@
 package messagedb
 
 import (
+	"errors"
 	"time"
 
 	"github.com/influenzanet/messaging-service/pkg/types"
@@ -38,22 +39,40 @@ func (dbService *MessageDBService) AddToSentEmails(instanceID string, email type
 	return email, nil
 }
 
-func (dbService *MessageDBService) FetchOutgoingEmails(instanceID string, amount int, onlyHighPrio bool) (emails []types.OutgoingEmail, err error) {
+func (dbService *MessageDBService) FetchOutgoingEmails(instanceID string, amount int, olderThan int64, onlyHighPrio bool) (emails []types.OutgoingEmail, err error) {
 	ctx, cancel := dbService.getContext()
 	defer cancel()
 
 	counter := 0
 	for counter < amount {
 		var newEmail types.OutgoingEmail
-		filter := bson.M{}
+		update := bson.M{"$set": bson.M{"lastSendAttempt": time.Now().Unix()}}
+		filter := bson.M{"lastSendAttempt": bson.M{"$lt": time.Now().Unix() - olderThan}}
 		if onlyHighPrio {
 			filter["highPrio"] = true
 		}
-		if err := dbService.collectionRefOutgoingEmails(instanceID).FindOneAndDelete(ctx, filter).Decode(&newEmail); err != nil {
+		if err := dbService.collectionRefOutgoingEmails(instanceID).FindOneAndUpdate(ctx, filter, update).Decode(&newEmail); err != nil {
 			break
 		}
 		emails = append(emails, newEmail)
 		counter += 1
 	}
 	return emails, nil
+}
+
+func (dbService *MessageDBService) DeleteOutgoingEmail(instanceID string, id string) error {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	_id, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.M{"_id": _id}
+
+	res, err := dbService.collectionRefOutgoingEmails(instanceID).DeleteOne(ctx, filter, nil)
+	if err != nil {
+		return err
+	}
+	if res.DeletedCount < 1 {
+		return errors.New("no user found with the given id")
+	}
+	return nil
 }
