@@ -140,7 +140,7 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 				HighPrio:        email.HighPrio,
 			})
 			if err != nil {
-				log.Printf("Could not send email in instance %s ", instance.InstanceID)
+				log.Printf("Could not send email in instance %s: %v", instance.InstanceID, err)
 				continue
 			}
 

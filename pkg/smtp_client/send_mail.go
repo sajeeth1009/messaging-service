@@ -60,7 +60,6 @@ func (sc *SmtpClients) SendMail(
 	if err != nil {
 		// close and try to reconnect
 		log.Printf("error when trying to send email: %v", err)
-		selectedServer.Close()
 		pool, errReconnect := connectToPool(sc.servers.Servers[index])
 		if errReconnect != nil {
 			log.Printf("cannot reconnect pool for %v", sc.servers.Servers[index])
