@@ -32,6 +32,8 @@ func AsyncSendToAllUsers(
 		log.Printf("AsyncSendToAllUsers: %v", err)
 		return
 	}
+	startTime := time.Now().Unix()
+	counter := 0
 	for {
 		user, err := stream.Recv()
 		if err == io.EOF {
@@ -91,13 +93,15 @@ func AsyncSendToAllUsers(
 		outgoingEmail.Subject = subject
 		outgoingEmail.Content = content
 
-		go sendMail(
+		sendMail(
 			apiClients.EmailClientService,
 			instanceID,
 			messageDBService,
 			outgoingEmail,
 		)
+		counter += 1
 	}
+	log.Printf("Finished processing %d '%s' messages in %d s.", counter, messageTemplate.MessageType, time.Now().Unix()-startTime)
 }
 
 func AsyncSendToStudyParticipants(
@@ -113,6 +117,9 @@ func AsyncSendToStudyParticipants(
 		return
 	}
 	currentWeekday := time.Now().Weekday()
+
+	startTime := time.Now().Unix()
+	counter := 0
 	for {
 		user, err := stream.Recv()
 		if err == io.EOF {
@@ -196,13 +203,15 @@ func AsyncSendToStudyParticipants(
 		outgoingEmail.Subject = subject
 		outgoingEmail.Content = content
 
-		go sendMail(
+		sendMail(
 			apiClients.EmailClientService,
 			instanceID,
 			messageDBService,
 			outgoingEmail,
 		)
+		counter += 1
 	}
+	log.Printf("Finished processing %d '%s' messages in %d s.", counter, messageTemplate.MessageType, time.Now().Unix()-startTime)
 }
 
 func expressionArgFromMessageToStudyAPI(arg *api.ExpressionArg) *studyAPI.ExpressionArg {
