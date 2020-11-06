@@ -20,43 +20,49 @@ import (
 
 const loginTokenLifeTime = 7 * 24 * 60 * 60 // 7 days
 
-func AsyncSendToAllUsers(
+type messageCounter struct {
+	total   int
+	failed  int
+	success int
+}
+
+func (mc *messageCounter) IncreaseCounter(success bool) {
+	mc.total += 1
+	if success {
+		mc.success += 1
+	} else {
+		mc.failed += 1
+	}
+}
+
+func SendToAllUsers(
 	apiClients *types.APIClients,
 	messageDBService *messagedb.MessageDBService,
 	instanceID string,
 	messageTemplate types.EmailTemplate,
 ) {
 	currentWeekday := time.Now().Weekday()
-	var filters *umAPI.StreamUsersMsg_Filters
 
-	if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER ||
-		messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
-		filters = &umAPI.StreamUsersMsg_Filters{
-			OnlyConfirmedAccounts:    true,
-			UseReminderWeekdayFilter: true,
-			ReminderWeekday:          int32(currentWeekday),
-		}
-	}
-
-	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(),
-		&umAPI.StreamUsersMsg{
-			InstanceId: instanceID,
-			Filters:    filters,
-		},
-	)
+	stream, err := getFilteredUserStream(apiClients, instanceID, messageTemplate.MessageType, int32(currentWeekday))
 	if err != nil {
-		log.Printf("AsyncSendToAllUsers: %v", err)
+		log.Printf("SendToAllUsers: %v", err)
 		return
 	}
+
 	startTime := time.Now().Unix()
-	counter := 0
+	counters := messageCounter{
+		total:   0,
+		failed:  0,
+		success: 0,
+	}
+
 	for {
 		user, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			log.Printf("%v.AsyncSendToAllUsers(_) = _, %v", apiClients.UserManagementService, err)
+			log.Printf("%v.SendToAllUsers(_) = _, %v", apiClients.UserManagementService, err)
 			break
 		}
 
@@ -83,7 +89,7 @@ func AsyncSendToAllUsers(
 
 			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
 			if err != nil {
-				log.Printf("AsyncSendToAllUsers: %v", err)
+				log.Printf("SendToAllUsers: %v", err)
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
@@ -94,7 +100,7 @@ func AsyncSendToAllUsers(
 			}
 			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, loginTokenLifeTime)
 			if err != nil {
-				log.Printf("AsyncSendToAllUsers: %v", err)
+				log.Printf("SendToAllUsers: %v", err)
 				continue
 			}
 			contentInfos["loginToken"] = token
@@ -102,47 +108,53 @@ func AsyncSendToAllUsers(
 
 		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
 		if err != nil {
-			log.Printf("AsyncSendToAllUsers: %v", err)
+			log.Printf("SendToAllUsers: %v", err)
 			continue
 		}
 
 		outgoingEmail.Subject = subject
 		outgoingEmail.Content = content
 
-		sendMail(
+		success := sendMail(
 			apiClients.EmailClientService,
 			instanceID,
 			messageDBService,
 			outgoingEmail,
 		)
-		counter += 1
+		counters.IncreaseCounter(success)
 	}
-	log.Printf("Finished processing %d '%s' messages in %d s.", counter, messageTemplate.MessageType, time.Now().Unix()-startTime)
+	log.Printf("Finished processing %d (%d sent, %d failed) '%s' messages in %d s.", counters.total, counters.success, counters.failed, messageTemplate.MessageType, time.Now().Unix()-startTime)
 }
 
-func AsyncSendToStudyParticipants(
+func SendToStudyParticipants(
 	apiClients *types.APIClients,
 	messageDBService *messagedb.MessageDBService,
 	instanceID string,
 	messageTemplate types.EmailTemplate,
 	condition *api.ExpressionArg,
 ) {
-	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(), &umAPI.StreamUsersMsg{InstanceId: instanceID})
-	if err != nil {
-		log.Printf("AsyncSendToStudyParticipants: %v", err)
-		return
-	}
 	currentWeekday := time.Now().Weekday()
 
+	stream, err := getFilteredUserStream(apiClients, instanceID, messageTemplate.MessageType, int32(currentWeekday))
+	if err != nil {
+		log.Printf("SendToStudyParticipants: %v", err)
+		return
+	}
+
 	startTime := time.Now().Unix()
-	counter := 0
+	counters := messageCounter{
+		total:   0,
+		failed:  0,
+		success: 0,
+	}
+
 	for {
 		user, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			log.Printf("%v.AsyncSendToStudyParticipants(_) = _, %v", apiClients.UserManagementService, err)
+			log.Printf("%v.SendToStudyParticipants(_) = _, %v", apiClients.UserManagementService, err)
 			break
 		}
 
@@ -178,7 +190,7 @@ func AsyncSendToStudyParticipants(
 		if user.Account.Type == "email" {
 			outgoingEmail.To = []string{user.Account.AccountId}
 		} else {
-			log.Println("AsyncSendToStudyParticipants: account type not supported yet.")
+			log.Println("SendToStudyParticipants: account type not supported yet.")
 			continue
 		}
 
@@ -192,7 +204,7 @@ func AsyncSendToStudyParticipants(
 
 			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
 			if err != nil {
-				log.Printf("AsyncSendToAllUsers: %v", err)
+				log.Printf("SendToStudyParticipants: %v", err)
 				continue
 			}
 			contentInfos["unsubscribeToken"] = token
@@ -203,7 +215,7 @@ func AsyncSendToStudyParticipants(
 			}
 			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, 604800)
 			if err != nil {
-				log.Printf("AsyncSendToAllUsers: %v", err)
+				log.Printf("SendToStudyParticipants: %v", err)
 				continue
 			}
 			contentInfos["loginToken"] = token
@@ -212,22 +224,22 @@ func AsyncSendToStudyParticipants(
 
 		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
 		if err != nil {
-			log.Printf("AsyncSendToAllUsers: %v", err)
+			log.Printf("SendToStudyParticipants: %v", err)
 			continue
 		}
 
 		outgoingEmail.Subject = subject
 		outgoingEmail.Content = content
 
-		sendMail(
+		success := sendMail(
 			apiClients.EmailClientService,
 			instanceID,
 			messageDBService,
 			outgoingEmail,
 		)
-		counter += 1
+		counters.IncreaseCounter(success)
 	}
-	log.Printf("Finished processing %d '%s' messages in %d s.", counter, messageTemplate.MessageType, time.Now().Unix()-startTime)
+	log.Printf("Finished processing %d (%d sent, %d failed) '%s' messages in %d s.", counters.total, counters.success, counters.failed, messageTemplate.MessageType, time.Now().Unix()-startTime)
 }
 
 func expressionArgFromMessageToStudyAPI(arg *api.ExpressionArg) *studyAPI.ExpressionArg {
@@ -269,6 +281,30 @@ func expressionFromMessageToStudyAPI(arg *api.Expression) *studyAPI.Expression {
 	return newArg
 }
 
+func getFilteredUserStream(
+	apiClients *types.APIClients,
+	instanceID string,
+	messageType string,
+	weekday int32,
+) (umAPI.UserManagementApi_StreamUsersClient, error) {
+	var filters *umAPI.StreamUsersMsg_Filters
+	if messageType == constants.EMAIL_TYPE_NEWSLETTER ||
+		messageType == constants.EMAIL_TYPE_WEEKLY {
+		filters = &umAPI.StreamUsersMsg_Filters{
+			OnlyConfirmedAccounts:    true,
+			UseReminderWeekdayFilter: true,
+			ReminderWeekday:          weekday,
+		}
+	}
+
+	return apiClients.UserManagementService.StreamUsers(context.Background(),
+		&umAPI.StreamUsersMsg{
+			InstanceId: instanceID,
+			Filters:    filters,
+		},
+	)
+}
+
 func getEmailsByIds(contacts []*umAPI.ContactInfo, ids []string) []string {
 	emails := []string{}
 	for _, c := range contacts {
@@ -305,7 +341,7 @@ func sendMail(
 	instanceID string,
 	messageDBService *messagedb.MessageDBService,
 	mail types.OutgoingEmail,
-) {
+) bool {
 	_, err := emailClient.SendEmail(context.Background(), &emailAPI.SendEmailReq{
 		To:              mail.To,
 		HeaderOverrides: mail.HeaderOverrides.ToEmailClientAPI(),
@@ -318,13 +354,14 @@ func sendMail(
 		if errS != nil {
 			log.Printf("Error while saving to outgoing: %v", errS)
 		}
-		return
+		return false
 	}
 
 	_, err = messageDBService.AddToSentEmails(instanceID, mail)
 	if err != nil {
 		log.Printf("Error when saving to sent: %v", err)
 	}
+	return true
 }
 
 func getTemploginToken(

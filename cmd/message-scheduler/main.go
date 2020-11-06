@@ -175,7 +175,7 @@ func handleAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBS
 		for _, messageDef := range activeMessages {
 			switch messageDef.Type {
 			case "all-users":
-				go bulk_messages.AsyncSendToAllUsers(
+				go bulk_messages.SendToAllUsers(
 					clients,
 					mdb,
 					instance.InstanceID,
@@ -183,7 +183,7 @@ func handleAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBS
 				)
 			case "study-participants":
 				messageDef.Template.StudyKey = messageDef.StudyKey
-				go bulk_messages.AsyncSendToStudyParticipants(
+				go bulk_messages.SendToStudyParticipants(
 					clients,
 					mdb,
 					instance.InstanceID,
