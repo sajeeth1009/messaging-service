@@ -27,7 +27,23 @@ func AsyncSendToAllUsers(
 	messageTemplate types.EmailTemplate,
 ) {
 	currentWeekday := time.Now().Weekday()
-	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(), &umAPI.StreamUsersMsg{InstanceId: instanceID})
+	var filters *umAPI.StreamUsersMsg_Filters
+
+	if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER ||
+		messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
+		filters = &umAPI.StreamUsersMsg_Filters{
+			OnlyConfirmedAccounts:    true,
+			UseReminderWeekdayFilter: true,
+			ReminderWeekday:          int32(currentWeekday),
+		}
+	}
+
+	stream, err := apiClients.UserManagementService.StreamUsers(context.Background(),
+		&umAPI.StreamUsersMsg{
+			InstanceId: instanceID,
+			Filters:    filters,
+		},
+	)
 	if err != nil {
 		log.Printf("AsyncSendToAllUsers: %v", err)
 		return
