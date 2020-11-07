@@ -16,6 +16,10 @@ import (
 	"github.com/influenzanet/messaging-service/pkg/types"
 )
 
+const (
+	outgoingBatchSize = 20
+)
+
 // Config is the structure that holds all global configuration data
 type Config struct {
 	Frequencies struct {
@@ -91,10 +95,10 @@ func main() {
 }
 
 func runnerForHighPrioOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, freq int) {
-	olderThan := int64(float64(freq) * 0.8)
+	lastAttemptOlderThan := int64(float64(freq) * 0.8)
 	for {
 		log.Println("Fetch and send high prio outgoing emails.")
-		go handleOutgoingEmails(mdb, gdb, clients, olderThan, true)
+		go handleOutgoingEmails(mdb, gdb, clients, lastAttemptOlderThan, true)
 		time.Sleep(time.Duration(freq) * time.Second)
 	}
 }
@@ -116,21 +120,28 @@ func runnerForAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.Global
 	}
 }
 
-func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, olderThan int64, onlyHighPrio bool) {
+func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients, lastAttemptOlderThan int64, onlyHighPrio bool) {
 	instances, err := gdb.GetAllInstances()
 	if err != nil {
 		log.Printf("handleOutgoingEmails.GetAllInstances: %v", err)
 	}
 	for _, instance := range instances {
-		emails, err := mdb.FetchOutgoingEmails(instance.InstanceID, 500, olderThan, onlyHighPrio)
+		go handleOutgoingForInstanceID(mdb, instance.InstanceID, clients, lastAttemptOlderThan, onlyHighPrio)
+	}
+}
+
+func handleOutgoingForInstanceID(mdb *messagedb.MessageDBService, instanceID string, clients *types.APIClients, lastAttemptOlderThan int64, onlyHighPrio bool) {
+	counters := types.InitMessageCounter()
+	for {
+		emails, err := mdb.FetchOutgoingEmails(instanceID, outgoingBatchSize, lastAttemptOlderThan, onlyHighPrio)
 		if err != nil {
-			log.Printf("handleOutgoingEmails.FetchOutgoingEmails for %s: %v", instance.InstanceID, err)
-			continue
+			log.Printf("handleOutgoingEmails.FetchOutgoingEmails for %s: %v", instanceID, err)
+			break
 		}
 		if len(emails) < 1 {
-			continue
+			break
 		}
-		log.Printf("%d outgoing emails found in instance %s", len(emails), instance.InstanceID)
+
 		for _, email := range emails {
 			_, err := clients.EmailClientService.SendEmail(context.Background(), &emailAPI.SendEmailReq{
 				To:              email.To,
@@ -140,21 +151,29 @@ func handleOutgoingEmails(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalD
 				HighPrio:        email.HighPrio,
 			})
 			if err != nil {
-				log.Printf("Could not send email in instance %s: %v", instance.InstanceID, err)
+				log.Printf("Could not send email in instance %s: %v", instanceID, err)
+				counters.IncreaseCounter(false)
 				continue
 			}
 
-			_, err = mdb.AddToSentEmails(instance.InstanceID, email)
+			_, err = mdb.AddToSentEmails(instanceID, email)
 			if err != nil {
 				log.Printf("Error while saving to sent: %v", err)
 				continue
 			}
-			err = mdb.DeleteOutgoingEmail(instance.InstanceID, email.ID.Hex())
+			err = mdb.DeleteOutgoingEmail(instanceID, email.ID.Hex())
 			if err != nil {
 				log.Printf("Error while deleting outgoing: %v", err)
 			}
+			counters.IncreaseCounter(true)
 		}
 	}
+	counters.Stop()
+	prioText := ""
+	if onlyHighPrio {
+		prioText = " with high prio"
+	}
+	log.Printf("[%s] Finished processing %d (%d sent, %d failed) messages%s in %d s.", instanceID, counters.Total, counters.Success, counters.Failed, prioText, counters.Duration)
 }
 
 func handleAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBService, clients *types.APIClients) {
@@ -173,26 +192,12 @@ func handleAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBS
 		}
 
 		for _, messageDef := range activeMessages {
-			switch messageDef.Type {
-			case "all-users":
-				go bulk_messages.SendToAllUsers(
-					clients,
-					mdb,
-					instance.InstanceID,
-					messageDef.Template,
-				)
-			case "study-participants":
-				messageDef.Template.StudyKey = messageDef.StudyKey
-				go bulk_messages.SendToStudyParticipants(
-					clients,
-					mdb,
-					instance.InstanceID,
-					messageDef.Template,
-					messageDef.Condition.ToAPI(),
-				)
-			default:
-				log.Printf("handleAutoMessages: message type unknown: %s", messageDef.Type)
-			}
+			go bulk_messages.GenerateAutoMessages(
+				clients,
+				mdb,
+				instance.InstanceID,
+				messageDef,
+			)
 
 			messageDef.NextTime += messageDef.Period
 			_, err := mdb.SaveAutoMessage(instance.InstanceID, messageDef)
@@ -202,5 +207,4 @@ func handleAutoMessages(mdb *messagedb.MessageDBService, gdb *globaldb.GlobalDBS
 			}
 		}
 	}
-
 }

@@ -3,13 +3,13 @@ package bulk_messages
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"log"
 	"time"
 
 	"github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/go-utils/pkg/constants"
-	emailAPI "github.com/influenzanet/messaging-service/pkg/api/email_client_service"
 	api "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/messaging-service/pkg/dbs/messagedb"
 	"github.com/influenzanet/messaging-service/pkg/templates"
@@ -20,40 +20,47 @@ import (
 
 const loginTokenLifeTime = 7 * 24 * 60 * 60 // 7 days
 
-type messageCounter struct {
-	total   int
-	failed  int
-	success int
-}
-
-func (mc *messageCounter) IncreaseCounter(success bool) {
-	mc.total += 1
-	if success {
-		mc.success += 1
-	} else {
-		mc.failed += 1
+func GenerateAutoMessages(
+	apiClients *types.APIClients,
+	messageDBService *messagedb.MessageDBService,
+	instanceID string,
+	autoMessage types.AutoMessage,
+) {
+	switch autoMessage.Type {
+	case "all-users":
+		GenerateForAllUsers(
+			apiClients,
+			messageDBService,
+			instanceID,
+			autoMessage.Template,
+		)
+	case "study-participants":
+		autoMessage.Template.StudyKey = autoMessage.StudyKey
+		GenerateForStudyParticipants(
+			apiClients,
+			messageDBService,
+			instanceID,
+			autoMessage.Template,
+			autoMessage.Condition.ToAPI(),
+		)
+	default:
+		log.Printf("GenerateAutoMessages: message type unknown: %s", autoMessage.Type)
 	}
 }
 
-func SendToAllUsers(
+func GenerateForAllUsers(
 	apiClients *types.APIClients,
 	messageDBService *messagedb.MessageDBService,
 	instanceID string,
 	messageTemplate types.EmailTemplate,
 ) {
-	currentWeekday := time.Now().Weekday()
+	counters := types.InitMessageCounter()
 
+	currentWeekday := time.Now().Weekday()
 	stream, err := getFilteredUserStream(apiClients, instanceID, messageTemplate.MessageType, int32(currentWeekday))
 	if err != nil {
-		log.Printf("SendToAllUsers: %v", err)
+		log.Printf("GenerateForAllUsers: %v", err)
 		return
-	}
-
-	startTime := time.Now().Unix()
-	counters := messageCounter{
-		total:   0,
-		failed:  0,
-		success: 0,
 	}
 
 	for {
@@ -62,90 +69,53 @@ func SendToAllUsers(
 			break
 		}
 		if err != nil {
-			log.Printf("%v.SendToAllUsers(_) = _, %v", apiClients.UserManagementService, err)
+			log.Printf("%v.GenerateForAllUsers(_) = _, %v", apiClients.UserManagementService, err)
 			break
 		}
 
-		outgoingEmail := types.OutgoingEmail{
-			MessageType:     messageTemplate.MessageType,
-			HeaderOverrides: messageTemplate.HeaderOverrides,
-		}
-		contentInfos := map[string]string{}
-
-		if user.Account.Type == "email" {
-			outgoingEmail.To = []string{user.Account.AccountId}
-		}
-
-		if user.Account.AccountConfirmedAt < 1 {
-			log.Println("message is not sent, if account not confirmed")
-			continue
-		}
-		if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER {
-			if !user.ContactPreferences.SubscribedToNewsletter || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
-				// user does not want to get newsletter
-				continue
-			}
-			outgoingEmail.To = getEmailsByIds(user.ContactInfos, user.ContactPreferences.SendNewsletterTo)
-
-			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
-			if err != nil {
-				log.Printf("SendToAllUsers: %v", err)
-				continue
-			}
-			contentInfos["unsubscribeToken"] = token
-		} else if messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
-			if !user.ContactPreferences.SubscribedToWeekly || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
-				// user does not want to get weekly reminder
-				continue
-			}
-			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, loginTokenLifeTime)
-			if err != nil {
-				log.Printf("SendToAllUsers: %v", err)
-				continue
-			}
-			contentInfos["loginToken"] = token
-		}
-
-		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
-		if err != nil {
-			log.Printf("SendToAllUsers: %v", err)
+		if !isSubscribed(user, messageTemplate.MessageType) {
 			continue
 		}
 
-		outgoingEmail.Subject = subject
-		outgoingEmail.Content = content
-
-		success := sendMail(
-			apiClients.EmailClientService,
-			instanceID,
+		outgoing, err := prepareOutgoingEmail(
+			user,
+			apiClients,
 			messageDBService,
-			outgoingEmail,
+			instanceID,
+			messageTemplate,
 		)
-		counters.IncreaseCounter(success)
+		if err != nil {
+			counters.IncreaseCounter(false)
+			log.Printf("unexpected error: %v", err)
+			continue
+		}
+
+		_, err = messageDBService.AddToOutgoingEmails(instanceID, *outgoing)
+		if err != nil {
+			counters.IncreaseCounter(false)
+			log.Printf("unexpected error: %v", err)
+			continue
+		}
+		counters.IncreaseCounter(true)
 	}
-	log.Printf("Finished processing %d (%d sent, %d failed) '%s' messages in %d s.", counters.total, counters.success, counters.failed, messageTemplate.MessageType, time.Now().Unix()-startTime)
+	counters.Stop()
+	log.Printf("Generated %d (%d failed) '%s' messages in %d s.", counters.Total, counters.Failed, messageTemplate.MessageType, counters.Duration)
 }
 
-func SendToStudyParticipants(
+func GenerateForStudyParticipants(
 	apiClients *types.APIClients,
 	messageDBService *messagedb.MessageDBService,
 	instanceID string,
 	messageTemplate types.EmailTemplate,
 	condition *api.ExpressionArg,
 ) {
-	currentWeekday := time.Now().Weekday()
+	counters := types.InitMessageCounter()
 
+	currentWeekday := time.Now().Weekday()
 	stream, err := getFilteredUserStream(apiClients, instanceID, messageTemplate.MessageType, int32(currentWeekday))
 	if err != nil {
-		log.Printf("SendToStudyParticipants: %v", err)
+		log.Printf("GenerateForStudyParticipants: %v", err)
 		return
-	}
-
-	startTime := time.Now().Unix()
-	counters := messageCounter{
-		total:   0,
-		failed:  0,
-		success: 0,
 	}
 
 	for {
@@ -154,92 +124,126 @@ func SendToStudyParticipants(
 			break
 		}
 		if err != nil {
-			log.Printf("%v.SendToStudyParticipants(_) = _, %v", apiClients.UserManagementService, err)
+			log.Printf("%v.GenerateForAllUsers(_) = _, %v", apiClients.UserManagementService, err)
 			break
 		}
 
-		if user.Account.AccountConfirmedAt < 1 {
-			log.Println("message is not sent, if account not confirmed")
+		if !isSubscribed(user, messageTemplate.MessageType) {
 			continue
 		}
 
-		profileIDs := make([]string, len(user.Profiles))
-		for i, p := range user.Profiles {
-			profileIDs[i] = p.Id
-		}
-
-		// check if user is in the study with at least one profile
-		_, err = apiClients.StudyService.HasParticipantStateWithCondition(context.Background(), &studyAPI.ProfilesWithConditionReq{
-			InstanceId: instanceID,
-			ProfileIds: profileIDs,
-			StudyKey:   messageTemplate.StudyKey,
-			Condition:  expressionArgFromMessageToStudyAPI(condition),
-		})
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		// user profile in study with valid condition
-		outgoingEmail := types.OutgoingEmail{
-			MessageType:     messageTemplate.MessageType,
-			HeaderOverrides: messageTemplate.HeaderOverrides,
-		}
-		contentInfos := map[string]string{}
-
-		if user.Account.Type == "email" {
-			outgoingEmail.To = []string{user.Account.AccountId}
-		} else {
-			log.Println("SendToStudyParticipants: account type not supported yet.")
-			continue
-		}
-
-		if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER {
-			if !user.ContactPreferences.SubscribedToNewsletter {
-				// user does not want to get newsletter
-				continue
-			}
-
-			outgoingEmail.To = getEmailsByIds(user.ContactInfos, user.ContactPreferences.SendNewsletterTo)
-
-			token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
-			if err != nil {
-				log.Printf("SendToStudyParticipants: %v", err)
-				continue
-			}
-			contentInfos["unsubscribeToken"] = token
-		} else if messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
-			if !user.ContactPreferences.SubscribedToWeekly || user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek != int32(currentWeekday) {
-				// user does not want to get weekly reminder
-				continue
-			}
-			token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, 604800)
-			if err != nil {
-				log.Printf("SendToStudyParticipants: %v", err)
-				continue
-			}
-			contentInfos["loginToken"] = token
-			contentInfos["studyKey"] = messageTemplate.StudyKey
-		}
-
-		subject, content, err := prepareContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
-		if err != nil {
-			log.Printf("SendToStudyParticipants: %v", err)
-			continue
-		}
-
-		outgoingEmail.Subject = subject
-		outgoingEmail.Content = content
-
-		success := sendMail(
-			apiClients.EmailClientService,
+		if err = checkStudyStateForUser(
+			user,
+			apiClients,
 			instanceID,
+			messageTemplate.StudyKey,
+			condition,
+		); err != nil {
+			continue
+		}
+
+		outgoing, err := prepareOutgoingEmail(
+			user,
+			apiClients,
 			messageDBService,
-			outgoingEmail,
+			instanceID,
+			messageTemplate,
 		)
-		counters.IncreaseCounter(success)
+		if err != nil {
+			counters.IncreaseCounter(false)
+			log.Printf("unexpected error: %v", err)
+			continue
+		}
+
+		_, err = messageDBService.AddToOutgoingEmails(instanceID, *outgoing)
+		if err != nil {
+			counters.IncreaseCounter(false)
+			log.Printf("unexpected error: %v", err)
+			continue
+		}
+		counters.IncreaseCounter(true)
 	}
-	log.Printf("Finished processing %d (%d sent, %d failed) '%s' messages in %d s.", counters.total, counters.success, counters.failed, messageTemplate.MessageType, time.Now().Unix()-startTime)
+	counters.Stop()
+	log.Printf("Generated %d (%d failed) '%s' messages in %d s.", counters.Total, counters.Failed, messageTemplate.MessageType, counters.Duration)
+}
+
+func prepareOutgoingEmail(
+	user *umAPI.User,
+	apiClients *types.APIClients,
+	messageDBService *messagedb.MessageDBService,
+	instanceID string,
+	messageTemplate types.EmailTemplate,
+
+) (*types.OutgoingEmail, error) {
+	outgoingEmail := types.OutgoingEmail{
+		MessageType:     messageTemplate.MessageType,
+		HeaderOverrides: messageTemplate.HeaderOverrides,
+		AddedAt:         time.Now().Unix(),
+	}
+	contentInfos := map[string]string{}
+
+	if user.Account.Type == "email" {
+		outgoingEmail.To = []string{user.Account.AccountId}
+	} else {
+		return nil, fmt.Errorf("account type not supported yet: %s", user.Account.Type)
+	}
+
+	if messageTemplate.MessageType == constants.EMAIL_TYPE_NEWSLETTER {
+		outgoingEmail.To = getEmailsByIds(user.ContactInfos, user.ContactPreferences.SendNewsletterTo)
+		token, err := getUnsubscribeToken(apiClients.UserManagementService, instanceID, user)
+		if err != nil {
+			return nil, err
+		}
+		contentInfos["unsubscribeToken"] = token
+	} else if messageTemplate.MessageType == constants.EMAIL_TYPE_WEEKLY {
+		token, err := getTemploginToken(apiClients.UserManagementService, instanceID, user, messageTemplate.StudyKey, loginTokenLifeTime)
+		if err != nil {
+			return nil, err
+		}
+		contentInfos["loginToken"] = token
+		contentInfos["studyKey"] = messageTemplate.StudyKey
+	}
+
+	subject, content, err := generateEmailContent(messageTemplate, user.Account.PreferredLanguage, contentInfos)
+	if err != nil {
+		return nil, err
+	}
+
+	outgoingEmail.Subject = subject
+	outgoingEmail.Content = content
+	return &outgoingEmail, nil
+}
+
+func checkStudyStateForUser(
+	user *umAPI.User,
+	apiClients *types.APIClients,
+	instanceID string,
+	studyKey string,
+	condition *api.ExpressionArg,
+) error {
+	profileIDs := make([]string, len(user.Profiles))
+	for i, p := range user.Profiles {
+		profileIDs[i] = p.Id
+	}
+
+	// check if user is in the study with at least one profile
+	_, err := apiClients.StudyService.HasParticipantStateWithCondition(context.Background(), &studyAPI.ProfilesWithConditionReq{
+		InstanceId: instanceID,
+		ProfileIds: profileIDs,
+		StudyKey:   studyKey,
+		Condition:  expressionArgFromMessageToStudyAPI(condition),
+	})
+	return err
+}
+
+func isSubscribed(user *umAPI.User, messageType string) bool {
+	switch messageType {
+	case constants.EMAIL_TYPE_WEEKLY:
+		return user.ContactPreferences.SubscribedToWeekly
+	case constants.EMAIL_TYPE_NEWSLETTER:
+		return user.ContactPreferences.SubscribedToNewsletter
+	}
+	return true
 }
 
 func expressionArgFromMessageToStudyAPI(arg *api.ExpressionArg) *studyAPI.ExpressionArg {
@@ -319,7 +323,7 @@ func getEmailsByIds(contacts []*umAPI.ContactInfo, ids []string) []string {
 	return emails
 }
 
-func prepareContent(temp types.EmailTemplate, prefLang string, contentInfos map[string]string) (subject string, content string, err error) {
+func generateEmailContent(temp types.EmailTemplate, prefLang string, contentInfos map[string]string) (subject string, content string, err error) {
 	translation := templates.GetTemplateTranslation(temp, prefLang)
 	subject = translation.Subject
 	decodedTemplate, err := base64.StdEncoding.DecodeString(translation.TemplateDef)
@@ -334,34 +338,6 @@ func prepareContent(temp types.EmailTemplate, prefLang string, contentInfos map[
 		contentInfos,
 	)
 	return
-}
-
-func sendMail(
-	emailClient emailAPI.EmailClientServiceApiClient,
-	instanceID string,
-	messageDBService *messagedb.MessageDBService,
-	mail types.OutgoingEmail,
-) bool {
-	_, err := emailClient.SendEmail(context.Background(), &emailAPI.SendEmailReq{
-		To:              mail.To,
-		HeaderOverrides: mail.HeaderOverrides.ToEmailClientAPI(),
-		Subject:         mail.Subject,
-		Content:         mail.Content,
-	})
-	if err != nil {
-		log.Printf("Error when sending: %v", err)
-		_, errS := messageDBService.AddToOutgoingEmails(instanceID, mail)
-		if errS != nil {
-			log.Printf("Error while saving to outgoing: %v", errS)
-		}
-		return false
-	}
-
-	_, err = messageDBService.AddToSentEmails(instanceID, mail)
-	if err != nil {
-		log.Printf("Error when saving to sent: %v", err)
-	}
-	return true
 }
 
 func getTemploginToken(

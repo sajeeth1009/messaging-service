@@ -39,7 +39,7 @@ func (s *messagingServer) SendMessageToAllUsers(ctx context.Context, req *api.Se
 	}
 
 	// use go method (don't wait for result since it can take long)
-	go bulk_messages.SendToAllUsers(
+	go bulk_messages.GenerateForAllUsers(
 		s.clients,
 		s.messageDBservice,
 		req.Token.InstanceId,
@@ -63,7 +63,7 @@ func (s *messagingServer) SendMessageToStudyParticipants(ctx context.Context, re
 	req.Template.StudyKey = req.StudyKey
 
 	// use go method (don't wait for result since it can take long)
-	go bulk_messages.SendToStudyParticipants(
+	go bulk_messages.GenerateForStudyParticipants(
 		s.clients,
 		s.messageDBservice,
 		req.Token.InstanceId,
