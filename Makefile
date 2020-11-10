@@ -1,6 +1,8 @@
-.PHONY: test api mock docker-email-client docker-message-scheduler docker-messaging-service
+.PHONY: test api mock docker-email-client docker-message-scheduler docker-messaging-service messaging-service message-scheduler email-client-service
 
 PROTO_BUILD_DIR = ../../..
+# Where binary are put
+TARGET_DIR ?= ./
 
 DOCKER_OPTS ?= --rm
 
@@ -12,9 +14,11 @@ help:
 	@echo "  test  : run test suites"
 	@echo "  api: compile protobuf files for go"
 	@echo "  mock: generate mockup Services for testing"
+	@echo "  build: build services (env TARGET_DIR to define binary location)"
 	@echo "  docker-email-client: build docker container for email_client_service"
 	@echo "  docker-message-scheduler: build docker container for message scheduler"
 	@echo "  docker-messaging-service: build docker container for messaging-service"
+
 	@echo "Env:"
 	@echo "  DOCKER_OPTS : default docker build options (default : $(DOCKER_OPTS))"
 	@echo "  TEST_ARGS : Arguments to pass to go test call"
@@ -41,3 +45,14 @@ docker-message-scheduler:
 
 docker-messaging-service:
 	docker build -t  github.com/influenzanet/messaging-service:$(VERSION)  -f build/docker/messaging-service/Dockerfile $(DOCKER_OPTS) .
+
+messaging-service:
+	go build -o $(TARGET_DIR) ./cmd/messaging-service
+
+message-scheduler:
+	go build -o $(TARGET_DIR) ./cmd/message-scheduler
+
+email-client-service:
+	go build -o $(TARGET_DIR) ./cmd/email-client-service
+
+build: messaging-service message-scheduler email-client-service
