@@ -1,13 +1,12 @@
 package smtp_client
 
 import (
-	"errors"
 	"log"
-	"net/textproto"
+	"net/smtp"
+	"strings"
 	"time"
 
 	"github.com/influenzanet/messaging-service/pkg/types"
-	"github.com/jordan-wright/email"
 )
 
 func (sc *SmtpClients) SendMail(
@@ -16,16 +15,9 @@ func (sc *SmtpClients) SendMail(
 	htmlContent string,
 	overrides *types.HeaderOverrides,
 ) error {
-	sc.counter += 1
-	if len(sc.connectionPool) < 1 {
-		sc.connectionPool = initConnectionPool(sc.servers)
-		if len(sc.connectionPool) < 1 {
-			return errors.New("no servers defined")
-		}
-	}
+	sc.counter++
 
-	index := sc.counter % len(sc.connectionPool)
-	selectedServer := sc.connectionPool[index]
+	index := sc.counter % len(sc.servers.Servers)
 
 	From := sc.servers.From
 	Sender := sc.servers.Sender
@@ -46,27 +38,32 @@ func (sc *SmtpClients) SendMail(
 		}
 	}
 
-	e := &email.Email{
-		To:      to,
-		From:    From,
-		Sender:  Sender,
-		ReplyTo: ReplyTo,
-		Subject: subject,
-		HTML:    []byte(htmlContent),
-		Headers: textproto.MIMEHeader{},
+	msg := []byte("To: " + strings.Join(to, " ") + " \r\n" +
+		"From: " + From + " \r\n" +
+		"Sender: " + Sender + " \r\n" +
+		"ReplyTo: " + strings.Join(ReplyTo, " ") + " \r\n" +
+		"Subject: " + subject + "\r\n" +
+		"\r\n" +
+		htmlContent + " \r\n")
+	server := sc.servers.Servers[index]
+
+	auth := smtp.PlainAuth(
+		"",
+		server.AuthData.Username,
+		server.AuthData.Password,
+		server.Host,
+	)
+	if server.AuthData.Username == "" && server.AuthData.Password == "" {
+		auth = nil
 	}
-	err := selectedServer.Send(e, time.Second*time.Duration(sc.servers.Servers[index].SendTimeout))
+
+	start := time.Now().UnixNano()
+
+	err := smtp.SendMail(server.Address(), auth, From, to, msg)
+	log.Printf("Time taken to send message : %v ms", (time.Now().UnixNano()-start)/int64(time.Millisecond))
 
 	if err != nil {
-		// close and try to reconnect
 		log.Printf("error when trying to send email: %v", err)
-		pool, errReconnect := connectToPool(sc.servers.Servers[index])
-		if errReconnect != nil {
-			log.Printf("cannot reconnect pool for %v", sc.servers.Servers[index])
-		} else {
-			log.Printf("successfully reconnected to %v", sc.servers.Servers[index])
-			sc.connectionPool[index] = *pool
-		}
 	}
 	return err
 }
