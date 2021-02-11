@@ -60,11 +60,13 @@ func (sc *SmtpClients) SendMail(
 	if err != nil {
 		// close and try to reconnect
 		log.Printf("error when trying to send email: %v", err)
+		serverInfo := sc.servers.Servers[index]
+		serverInfo.AuthData.Password = "xxxxxx"
 		pool, errReconnect := connectToPool(sc.servers.Servers[index])
 		if errReconnect != nil {
-			log.Printf("cannot reconnect pool for %v", sc.servers.Servers[index])
+			log.Printf("cannot reconnect pool for %v", serverInfo)
 		} else {
-			log.Printf("successfully reconnected to %v", sc.servers.Servers[index])
+			log.Printf("successfully reconnected to %v", serverInfo)
 			sc.connectionPool[index] = *pool
 		}
 	}
