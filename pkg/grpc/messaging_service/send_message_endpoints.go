@@ -95,12 +95,14 @@ func (s *messagingServer) SendInstantEmail(ctx context.Context, req *api.SendEma
 	}
 
 	// execute template
+	templateName := req.InstanceId + req.MessageType + req.PreferredLanguage
 	content, err := templates.ResolveTemplate(
-		req.InstanceId+req.MessageType+req.PreferredLanguage,
+		templateName,
 		string(decodedTemplate),
 		req.ContentInfos,
 	)
 	if err != nil {
+		log.Printf("error when resolving template %s: %v", templateName, err)
 		return nil, status.Error(codes.Internal, "content could not be generated")
 	}
 

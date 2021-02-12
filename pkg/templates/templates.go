@@ -20,7 +20,7 @@ func GetTemplateTranslation(tDef types.EmailTemplate, lang string) types.Localiz
 }
 
 func ResolveTemplate(tempName string, templateDef string, contentInfos map[string]string) (content string, err error) {
-	tmpl, err := template.New("").Parse(templateDef)
+	tmpl, err := template.New(tempName).Parse(templateDef)
 	if err != nil {
 		return "", err
 	}
